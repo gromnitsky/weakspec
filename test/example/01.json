@@ -1,0 +1,54 @@
+{
+	"Group #1" : {
+		"name" : "opt1",
+		"desc" : "Options #1 in group #1",
+		"help" : "A help string for an options #1",
+		"type" : "char*",
+		"default" : "ua",
+		"cleanByRegexp" : null,
+		"cleanCallback" : null,
+		"validationRegexp" : "^[a-z]{2}$",
+		"validationCallback" : null,
+		"allowEmpty" : true
+	},
+	"Group #2" : {
+		"name" : "opt1",
+		"desc" : "Options #1 in group #2",
+		"help" : "A help string for an options #1",
+		"type" : "int",
+		"default" : 42,
+		"validationCallback" : null,
+		"cleanCallback" : null,
+		"range" : [0, 127]
+	},
+	"Group #3" : {
+		"name" : "opt1",
+		"desc" : "Options #1 in group #3",
+		"help" : "A help string for an options #1",
+		"type" : "char**",
+		"default" : ["one", "two"],
+		"size" : [1, 4],
+		"cleanByRegexp" : null,
+		"cleanCallback" : null,
+		"validationCallback" : null,
+		"validationRegexp" : "^[a-z]{3}$"
+	},
+	"Group #4" : {
+		"name" : "opt1",
+		"desc" : "Options #1 in group #4",
+		"help" : "A help string for an options #1",
+		"type" : "int**",
+		"default" : [1, 2],
+		"size" : [2, 2],
+		"cleanCallback" : null,
+		"validationCallback" : null,
+		"range" : [8, 16]
+	},
+	"Group #5" : {
+		"name" : "opt1",
+		"desc" : "Options #1 in group #5",
+		"help" : "A help string for an options #1",
+		"type" : "bool",
+		"default" : false
+	}
+}
