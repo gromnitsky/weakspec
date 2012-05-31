@@ -2,15 +2,15 @@ ws = module.exports
 
 class ws.ParseError extends Error
     constructor: (msg) ->
-        e = super "parser: #{msg}"
-        e.name = 'ws.ParseError'
-        return e # works in coffeescript 1.3.3
+        Error.captureStackTrace @, @constructor
+        @name = @constructor.name
+        @message = "parser: #{msg}"
 
 class ws.GroupError extends ws.ParseError
     constructor: (@group, msg) ->
-        e = super "group '#{@group}': #{msg}"
-        e.name = 'ws.GroupError'
-        return e
+        Error.captureStackTrace @, @constructor
+        @name = @constructor.name
+        @message = "parser: group '#{@group}': #{msg}"
 
 
 class ws.WeakSpec

@@ -14,22 +14,9 @@ suite 'WeakSpec', ->
         assert.equal 5, this.ws01.size()
 
     test 'char* validation', ->
-        p = {
-            "name" : "opt1",
-            "desc" : "Options #1 in group #1",
-            "help" : "A help string for an options #1",
-            "type" : "char*",
-            "default" : "ua",
-            "cleanByRegexp" : null,
-            "cleanCallback" : null,
-            "validationRegexp" : "^[a-z]{2}$",
-            "validationCallback" : null,
-            "allowEmpty" : true
-        }
-        
         assert.throws ->
             (new ws.PrefStr 'foo', {}).validate()
-        , /ws.GroupError: parser: group 'foo': missing 'name'/
+        , /GroupError: parser: group 'foo': missing 'name'/
         
         assert.throws ->
             (new ws.PrefStr 'foo', {"name" : null}).validate()
@@ -42,7 +29,7 @@ suite 'WeakSpec', ->
                 "desc" : "zzz",
                 "default" : []
             }).validate()
-        , /invalid value in 'default'/
+        , ws.GroupError
         
         min = {
             "type" : null,
