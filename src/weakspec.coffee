@@ -1,4 +1,8 @@
-ws = module.exports
+if module
+    ws = module.exports
+    drw = require './drawer'
+else
+    ws = window
 
 class ws.ParseError extends Error
     constructor: (msg) ->
@@ -6,26 +10,26 @@ class ws.ParseError extends Error
         @name = @constructor.name
         @message = "parser: #{msg}"
 
-class ws.GroupError extends ws.ParseError
-    constructor: (@group, msg) ->
+class ws.PrefError extends ws.ParseError
+    constructor: (group, prefName, msg) ->
         Error.captureStackTrace @, @constructor
         @name = @constructor.name
-        @message = "parser: group '#{@group}': #{msg}"
+        @message = "parser: group '#{group}': pref '#{prefName}': #{msg}"
 
 
 class ws.WeakSpec
     constructor: (@spec) ->
-        throw new ws.ParseError('the spec must contain at least 1 entry') if this.size() < 1
-        this.chain = []
-        (this.chain.push this.delegate(k, v)) for k,v of @spec
+        throw new ws.ParseError('the spec must contain at least 1 group') if @size() < 1
+        for group, opts of @spec
+            this.validate group, name, instr for name, instr of opts
 
     size: ->
         n = 0
         n++ for k of @spec
         n
 
-    delegate: (group, instructions) ->
-        throw new ws.GroupError group, "no type" unless instructions.type
+    validate: (group, name, instr) ->
+        throw new ws.PrefError group, name, "no type" unless instr.type
 
         mapping = {
             'char*' : ws.PrefStr,
@@ -35,20 +39,17 @@ class ws.WeakSpec
             'bool' : ws.PrefBool
         }
 
-        throw new ws.GroupError group, "invalid type '#{instructions.type}'" unless mapping[instructions.type]
-        (new mapping[instructions.type](group, instructions)).gen()
+        throw new ws.PrefError group, "invalid type '#{instr.type}'" unless mapping[instr.type]
+        (new mapping[instr.type](group, name, instr)).validate()
 
-    draw: ->
-        console.log this.chain
+    toHtml: ->
+        (new drw.Drawer @spec).draw()
 
-# Interface
+# Interface to data validation from a specfile.
 class Pref
-    constructor: (@group, @instructions) ->
-        throw new ws.ParseError "no group or instructions specified" unless @group && @instructions
+    constructor: (@group, @name, @instr) ->
+        throw new ws.ParseError "no group or name or instractions" unless @group && @name && @instr
         @req = {
-            'name' : (val) =>
-                this.isStr(val)
-            ,
             'desc' : (val) =>
                 this.isStr(val)
             ,
@@ -59,15 +60,12 @@ class Pref
 
     validate: ->
         for k of @req
-            throw new ws.GroupError @group, "missing '#{k}'" if @instructions[k] == undefined
-            throw new ws.GroupError @group, "invalid value in '#{k}'" if @req[k] && !@req[k](@instructions[k])
+            throw new ws.PrefError @group, @name, "missing '#{k}'" if @instr[k] == undefined
+            throw new ws.PrefError @group, @name, "invalid value in '#{k}'" if @req[k] && !@req[k](@instr[k])
 
-        for k of @instructions when @req[k] == undefined
-            throw new ws.GroupError @group, "'#{k}' is unknown" if @optional[k] == undefined
-            throw new ws.GroupError @group, "invalid value in '#{k}'" if @optional[k] && @instructions[k] != null && !@optional[k](@instructions[k])
-
-    gen: ->
-        throw new Error 'override me'
+        for k of @instr when @req[k] == undefined
+            throw new ws.PrefError @group, @name, "'#{k}' is unknown" if @optional[k] == undefined
+            throw new ws.PrefError @group, @name, "invalid value in '#{k}'" if @optional[k] && @instr[k] != null && !@optional[k](@instr[k])
 
     isStr: (t) ->
         return false if typeof t != 'string'
@@ -90,8 +88,8 @@ class Pref
         
 
 class ws.PrefStr extends Pref
-    constructor: (@group, @instructions) ->
-        super @group, @instructions
+    constructor: (@group, @name, @instr) ->
+        super @group, @name, @instr
         @req['default'] = (val) ->
             typeof val == 'string'
         
@@ -104,26 +102,18 @@ class ws.PrefStr extends Pref
         @optional['allowEmpty'] = (val) =>
             this.isBoolean val
 
-    gen: ->
-        this.validate()
-        "<h2>#{@group}<h2>"
-
 class ws.PrefInt extends Pref
-    constructor: (@group, @instructions) ->
-        super @group, @instructions
+    constructor: (@group, @name, @instr) ->
+        super @group, @name, @instr
         @req['default'] = (val) ->
             typeof val == 'number'
             
         @optional['range'] = (val) =>
             this.isRange val
 
-    gen: ->
-        this.validate()
-        "<h2>#{@group}<h2>"
-
 class ws.PrefArrayOfStr extends Pref
-    constructor: (@group, @instructions) ->
-        super @group, @instructions
+    constructor: (@group, @name, @instr) ->
+        super @group, @name, @instr
         @req['default'] = (val) ->
             return false unless val instanceof Array
             (return false if typeof idx != 'string') for idx in val
@@ -138,13 +128,9 @@ class ws.PrefArrayOfStr extends Pref
         @optional['size'] = (val) =>
             this.isSize val
 
-    gen: ->
-        this.validate()
-        "<h2>#{@group}<h2>"
-
 class ws.PrefArrayOfInt extends Pref
-    constructor: (@group, @instructions) ->
-        super @group, @instructions
+    constructor: (@group, @name, @instr) ->
+        super @group, @name, @instr
         @req['default'] = (val) ->
             return false unless val instanceof Array
             (return false if typeof idx != 'number') for idx in val
@@ -156,17 +142,9 @@ class ws.PrefArrayOfInt extends Pref
         @optional['size'] = (val) =>
             this.isSize val
 
-    gen: ->
-        this.validate()
-        "<h2>#{@group}<h2>"
-
 class ws.PrefBool extends Pref
-    constructor: (@group, @instructions) ->
-        super @group, @instructions
+    constructor: (@group, @name, @instr) ->
+        super @group, @name, @instr
         @req['default'] = (val) =>
             this.isBoolean val
-
-    gen: ->
-        this.validate()
-        "<h2>#{@group}<h2>"
 

@@ -2,7 +2,7 @@ fs = require 'fs'
 path = require 'path'
 assert = require 'assert'
 
-ws = require('../lib/parser.js')
+ws = require '../lib/weakspec'
 
 # opts--an array
 check_bogusVal = (prefClass, opts, bogusVal, instructions) ->
@@ -10,7 +10,7 @@ check_bogusVal = (prefClass, opts, bogusVal, instructions) ->
         orig = if instructions[idx] != undefined then instructions[idx] else null
         instructions[idx] = bogusVal
         assert.throws ->
-            (new prefClass 'foo', instructions).validate()
+            (new prefClass 'foo', 'bar', instructions).validate()
         , /invalid value/
         instructions[idx] = orig
 
@@ -20,7 +20,7 @@ check_val = (prefClass, opts, val, instructions) ->
         orig = if instructions[idx] != undefined then instructions[idx] else null
         instructions[idx] = val
         assert.doesNotThrow ->
-            (new prefClass 'foo', instructions).validate()
+            (new prefClass 'foo', 'bar', instructions).validate()
         instructions[idx] = orig
 
 suite 'WeakSpec', ->
@@ -31,63 +31,57 @@ suite 'WeakSpec', ->
 
         this.min_string = {
             "type" : null,
-            "name" : "option 1",
             "desc" : "z",
             "default" : ""
         }
         this.min_int = {
             "type" : null,
-            "name" : "option 2",
             "desc" : "zz",
             "default" : 42
         }
         this.min_arrayofstr = {
             "type" : null,
-            "name" : "option 3",
             "desc" : "zzz",
             "default" : ['q', 'w', 'e']
         }
         this.min_arrayofint = {
             "type" : null,
-            "name" : "option 4",
             "desc" : "zzzz",
             "default" : [1, 2, 3]
         }
         this.min_bool = {
             "type" : null,
-            "name" : "option 5",
             "desc" : "zzzzz",
             "default" : true
         }
 
-    test 'size of a spec must be == 5', ->
-        assert.equal 5, this.ws01.size()
+    test 'size of a spec must be == 4', ->
+        assert.equal 4, this.ws01.size()
 
     test 'char* validation ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefStr 'foo', this.min_string).validate()
+            (new ws.PrefStr 'foo', 'bar', this.min_string).validate()
 
         check_val ws.PrefStr, ['allowEmpty'], false, this.min_string
         
     test 'char* validation fail', ->
         assert.throws ->
-            (new ws.PrefStr 'foo', {}).validate()
-        , /GroupError: parser: group 'foo': missing 'name'/
+            (new ws.PrefStr 'foo', 'bar', {}).validate()
+        , /missing 'desc'/
         
-        check_bogusVal ws.PrefStr, ['name'], null, {"name" : null}
         check_bogusVal ws.PrefStr, ['default'], [], this.min_string
         check_bogusVal ws.PrefStr, ['cleanByRegexp', 'validationRegexp'], 1, this.min_string
         check_bogusVal ws.PrefStr, ['allowEmpty'], undefined, this.min_string
 
-        this.min_string.bar = 1
+        this.min_string.ooops = 1
         assert.throws =>
-            (new ws.PrefStr 'foo', this.min_string).validate()
-        , /'bar' is unknown/
-        delete this.min_string.bar
+            (new ws.PrefStr 'foo', 'bar', this.min_string).validate()
+        , /'ooops' is unknown/
+        delete this.min_string.ooops
 
     test 'int validaion ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefInt 'foo', this.min_int).validate()
+            (new ws.PrefInt 'foo', 'bar', this.min_int).validate()
 
         check_val ws.PrefInt, ['range'], [10, 100], this.min_int
 
@@ -101,7 +95,7 @@ suite 'WeakSpec', ->
 
     test 'char** validation ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefArrayOfStr 'foo', this.min_arrayofstr).validate()
+            (new ws.PrefArrayOfStr 'foo', 'bar', this.min_arrayofstr).validate()
 
         check_val ws.PrefArrayOfStr, ['size'], [1, 2], this.min_arrayofstr
 
@@ -117,7 +111,7 @@ suite 'WeakSpec', ->
 
     test 'int** validation ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefArrayOfInt 'foo', this.min_arrayofint).validate()
+            (new ws.PrefArrayOfInt 'foo', 'bar', this.min_arrayofint).validate()
 
         check_val ws.PrefArrayOfInt, ['range'], [-1, 2], this.min_arrayofint
         check_val ws.PrefArrayOfInt, ['size'], [1, 2], this.min_arrayofint
@@ -134,7 +128,7 @@ suite 'WeakSpec', ->
 
     test 'bool validation ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefBool 'foo', this.min_bool).validate()
+            (new ws.PrefBool 'foo', 'bar', this.min_bool).validate()
 
         check_val ws.PrefBool, ['default'], false, this.min_bool
         
