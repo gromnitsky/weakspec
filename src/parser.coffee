@@ -41,15 +41,16 @@ class ws.WeakSpec
     draw: ->
         console.log this.chain
 
-# Abstract
+# Interface
 class Pref
     constructor: (@group, @instructions) ->
+        throw new ws.ParseError "no group or instructions specified" unless @group && @instructions
         @req = {
             'name' : (val) =>
-                !this.isEmptyStr(val)
+                this.isStr(val)
             ,
             'desc' : (val) =>
-                !this.isEmptyStr(val)
+                this.isStr(val)
             ,
             'default' : null,
             'type' : null
@@ -68,24 +69,37 @@ class Pref
     gen: ->
         throw new Error 'override me'
 
-    isEmptyStr: (t) ->
-        return true if typeof t != 'string'
-        t.match /^\s*$/
+    isStr: (t) ->
+        return false if typeof t != 'string'
+        !t.match /^\s*$/
 
     isBoolean: (t) ->
         typeof t == 'boolean'
 
+    isRange: (t) ->
+        return false unless t instanceof Array
+        return false if t.length != 2
+        (return false if typeof idx != 'number') for idx in t
+        return false if t[0] > t[1]
+        true
+
+    isSize: (t) ->
+        return false unless this.isRange t
+        return false if t[0] < 0
+        true
+        
+
 class ws.PrefStr extends Pref
     constructor: (@group, @instructions) ->
         super @group, @instructions
-        @req['default'] = (val) =>
+        @req['default'] = (val) ->
             typeof val == 'string'
         
         @optional['cleanByRegexp'] = (val) =>
-            !this.isEmptyStr(val)
+            this.isStr(val)
 
         @optional['validationRegexp'] = (val) =>
-            !this.isEmptyStr(val)
+            this.isStr(val)
     
         @optional['allowEmpty'] = (val) =>
             this.isBoolean val
@@ -97,7 +111,11 @@ class ws.PrefStr extends Pref
 class ws.PrefInt extends Pref
     constructor: (@group, @instructions) ->
         super @group, @instructions
-        @optional['range'] = null
+        @req['default'] = (val) ->
+            typeof val == 'number'
+            
+        @optional['range'] = (val) =>
+            this.isRange val
 
     gen: ->
         this.validate()
@@ -106,9 +124,19 @@ class ws.PrefInt extends Pref
 class ws.PrefArrayOfStr extends Pref
     constructor: (@group, @instructions) ->
         super @group, @instructions
-        @optional['cleanByRegexp'] = null
-        @optional['validationRegexp'] = null
-        @optional['size'] = null
+        @req['default'] = (val) ->
+            return false unless val instanceof Array
+            (return false if typeof idx != 'string') for idx in val
+            true
+
+        @optional['cleanByRegexp'] = (val) =>
+            this.isStr val
+
+        @optional['validationRegexp'] = (val) =>
+            this.isStr val
+
+        @optional['size'] = (val) =>
+            this.isSize val
 
     gen: ->
         this.validate()
@@ -117,8 +145,16 @@ class ws.PrefArrayOfStr extends Pref
 class ws.PrefArrayOfInt extends Pref
     constructor: (@group, @instructions) ->
         super @group, @instructions
-        @optional['size'] = null
-        @optional['range'] = null
+        @req['default'] = (val) ->
+            return false unless val instanceof Array
+            (return false if typeof idx != 'number') for idx in val
+            true
+
+        @optional['range'] = (val) =>
+            this.isRange val
+
+        @optional['size'] = (val) =>
+            this.isSize val
 
     gen: ->
         this.validate()
@@ -127,6 +163,8 @@ class ws.PrefArrayOfInt extends Pref
 class ws.PrefBool extends Pref
     constructor: (@group, @instructions) ->
         super @group, @instructions
+        @req['default'] = (val) =>
+            this.isBoolean val
 
     gen: ->
         this.validate()
