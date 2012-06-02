@@ -1,8 +1,8 @@
 CS := coffee
 MOCHA := node_modules/.bin/mocha
 
-src := $(wildcard src/*.coffee)
-js := $(patsubst src/%.coffee,lib/%.js,$(src))
+src := $(wildcard *.coffee)
+js := $(patsubst %.coffee,%.js,$(src))
 
 .PHONY: clean clobber compile test
 
@@ -15,16 +15,17 @@ node_modules: package.json
 clobber: clean
 	rm -rf node_modules
 
-lib/%.js: src/%.coffee
+%.js: %.coffee
 	$(CS) -cp $< > $@
 
 clean:
-	rm -rf lib
+	rm -rf lib $(js)
 
 lib:
 	mkdir -p $@
 
 compile: node_modules lib $(js)
+	$(MAKE) -C src
 
 test: compile
 	$(MOCHA) --compilers coffee:coffee-script -u tdd

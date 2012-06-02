@@ -14,13 +14,14 @@ class drw.Drawer
         html = ''
         for group, opts of @spec
             html += "<fieldset id='#{@uid(group, "", "group")}' class='cut'>\n" +
-            "<legend>#{group}<legend>\n"
+            "<legend>#{group}</legend>\n" +
+            "<table border='1'>\n"
             
             (html += @generatePref group, name, instr) for name, instr of opts
             
-            html += "<div>\n"+
-            "<button id='#{@uid(group, "", "bReset")}'>Reset</button>\n" +
-            "<button id='#{@uid(group, "", "bSave")}'>Save</button>\n" +
+            html += "</table>\n<div>\n"+
+            "<button class='bReset' id='#{@uid(group, "", "bReset")}'>Reset</button>\n" +
+            "<button class='bSave' id='#{@uid(group, "", "bSave")}'>Save</button>\n" +
             "</div>\n" +
             "</fieldset>\n\n"
         html
@@ -53,7 +54,18 @@ class drw.Drawer
         }
 
         throw new Error "invalid type '#{instr.type}'" unless mapping[instr.type]
-        mapping[instr.type](group, name, instr)
+
+        html = "<tr>\n" +
+        "<td>#{instr.desc}</td>\n" +
+        "<td>\n"
+        html += mapping[instr.type](group, name, instr)
+        html += "</td>\n" +
+        "<td>\n" +
+        "<button class='bDefault' id='#{@uid(group, name, "bDefault")}'>Default</button>\n" +
+        "<a class='bHelp' href='#' id='#{@uid(group, name, "bHelp")}'>?</a>\n" +
+        "</td>\n" +
+        "</tr>\n"
+
 
     pString: (group, name, instr) ->
         'string'
@@ -67,5 +79,7 @@ class drw.Drawer
     pArrayOfInt: (group, name, instr) ->
         'aoi'
 
-    pBool: (group, name, instr) ->
-        'bool'
+    pBool: (group, name, instr) =>
+        checked = if instr.default then "checked='checked'" else ""
+        "<input type='checkbox' #{checked} id='#{@uid(group, name, "bool")}' />\n"
+        
