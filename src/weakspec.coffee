@@ -21,7 +21,7 @@ class ws.WeakSpec
     constructor: (@spec) ->
         throw new ws.ParseError('the spec must contain at least 1 group') if @size() < 1
         for group, opts of @spec
-            this.validate group, name, instr for name, instr of opts
+            @validate group, name, instr for name, instr of opts
 
     size: ->
         n = 0
@@ -30,6 +30,7 @@ class ws.WeakSpec
 
     validate: (group, name, instr) ->
         throw new ws.PrefError group, name, "no type" unless instr.type
+        @validateUid group, name
 
         mapping = {
             'char*' : ws.PrefStr,
@@ -41,6 +42,11 @@ class ws.WeakSpec
 
         throw new ws.PrefError group, "invalid type '#{instr.type}'" unless mapping[instr.type]
         (new mapping[instr.type](group, name, instr)).validate()
+
+    validateUid: (group, name) ->
+        re = /^[A-Za-z0-9_,. -]+$/
+        throw new ws.ParseError "group: invalud value '#{group}'" unless group.match re
+        throw new ws.ParseError "group: '#{group}': name: invalud value '#{name}'" unless name.match re
 
     toHtml: ->
         (new drw.Drawer @spec).draw()
