@@ -1,25 +1,29 @@
-if module
-    ws = module.exports
-    drw = require './drawer'
-else
-    ws = window
+root = exports ? this
 
-class ws.ParseError extends Error
+drw = require?('./drawer') || root
+
+class root.ParseError extends Error
     constructor: (msg) ->
-        Error.captureStackTrace @, @constructor
+        try
+            Error.captureStackTrace @, @constructor
+        catch e
+            ; # ignore in Opera
         @name = @constructor.name
         @message = "parser: #{msg}"
 
-class ws.PrefError extends ws.ParseError
+class root.PrefError extends root.ParseError
     constructor: (group, prefName, msg) ->
-        Error.captureStackTrace @, @constructor
+        try
+            Error.captureStackTrace @, @constructor
+        catch e
+            ; # ignore in Opera
         @name = @constructor.name
         @message = "parser: group '#{group}': pref '#{prefName}': #{msg}"
 
 
-class ws.WeakSpec
+class root.WeakSpec
     constructor: (@spec) ->
-        throw new ws.ParseError('the spec must contain at least 1 group') if @size() < 1
+        throw new root.ParseError('the spec must contain at least 1 group') if @size() < 1
         for group, opts of @spec
             @validate group, name, instr for name, instr of opts
 
@@ -29,24 +33,24 @@ class ws.WeakSpec
         n
 
     validate: (group, name, instr) ->
-        throw new ws.PrefError group, name, "no type" unless instr.type
+        throw new root.PrefError group, name, "no type" unless instr.type
         @validateUid group, name
 
         mapping = {
-            'char*' : ws.PrefStr,
-            'int' : ws.PrefInt,
-            'char**' : ws.PrefArrayOfStr,
-            'int**' : ws.PrefArrayOfInt,
-            'bool' : ws.PrefBool
+            'char*' : root.PrefStr,
+            'int' : root.PrefInt,
+            'char**' : root.PrefArrayOfStr,
+            'int**' : root.PrefArrayOfInt,
+            'bool' : root.PrefBool
         }
 
-        throw new ws.PrefError group, "invalid type '#{instr.type}'" unless mapping[instr.type]
+        throw new root.PrefError group, "invalid type '#{instr.type}'" unless mapping[instr.type]
         (new mapping[instr.type](group, name, instr)).validate()
 
     validateUid: (group, name) ->
         re = /^[A-Za-z0-9_,. -]+$/
-        throw new ws.ParseError "group: invalud value '#{group}'" unless group.match re
-        throw new ws.ParseError "group: '#{group}': name: invalud value '#{name}'" unless name.match re
+        throw new root.ParseError "group: invalud value '#{group}'" unless group.match re
+        throw new root.ParseError "group: '#{group}': name: invalud value '#{name}'" unless name.match re
 
     toHtml: ->
         (new drw.Drawer @spec).draw()
@@ -54,7 +58,7 @@ class ws.WeakSpec
 # Interface to data validation from a specfile.
 class Pref
     constructor: (@group, @name, @instr) ->
-        throw new ws.ParseError "no group or name or instractions" unless @group && @name && @instr
+        throw new root.ParseError "no group or name or instractions" unless @group && @name && @instr
         @req = {
             'desc' : (val) =>
                 this.isStr(val)
@@ -66,12 +70,12 @@ class Pref
 
     validate: ->
         for k of @req
-            throw new ws.PrefError @group, @name, "missing '#{k}'" if @instr[k] == undefined
-            throw new ws.PrefError @group, @name, "invalid value in '#{k}'" if @req[k] && !@req[k](@instr[k])
+            throw new root.PrefError @group, @name, "missing '#{k}'" if @instr[k] == undefined
+            throw new root.PrefError @group, @name, "invalid value in '#{k}'" if @req[k] && !@req[k](@instr[k])
 
         for k of @instr when @req[k] == undefined
-            throw new ws.PrefError @group, @name, "'#{k}' is unknown" if @optional[k] == undefined
-            throw new ws.PrefError @group, @name, "invalid value in '#{k}'" if @optional[k] && @instr[k] != null && !@optional[k](@instr[k])
+            throw new root.PrefError @group, @name, "'#{k}' is unknown" if @optional[k] == undefined
+            throw new root.PrefError @group, @name, "invalid value in '#{k}'" if @optional[k] && @instr[k] != null && !@optional[k](@instr[k])
 
     isStr: (t) ->
         return false if typeof t != 'string'
@@ -93,7 +97,7 @@ class Pref
         true
         
 
-class ws.PrefStr extends Pref
+class root.PrefStr extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
         @req['default'] = (val) ->
@@ -108,7 +112,7 @@ class ws.PrefStr extends Pref
         @optional['allowEmpty'] = (val) =>
             this.isBoolean val
 
-class ws.PrefInt extends Pref
+class root.PrefInt extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
         @req['default'] = (val) ->
@@ -117,7 +121,7 @@ class ws.PrefInt extends Pref
         @optional['range'] = (val) =>
             this.isRange val
 
-class ws.PrefArrayOfStr extends Pref
+class root.PrefArrayOfStr extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
         @req['default'] = (val) ->
@@ -134,7 +138,7 @@ class ws.PrefArrayOfStr extends Pref
         @optional['size'] = (val) =>
             this.isSize val
 
-class ws.PrefArrayOfInt extends Pref
+class root.PrefArrayOfInt extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
         @req['default'] = (val) ->
@@ -148,7 +152,7 @@ class ws.PrefArrayOfInt extends Pref
         @optional['size'] = (val) =>
             this.isSize val
 
-class ws.PrefBool extends Pref
+class root.PrefBool extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
         @req['default'] = (val) =>

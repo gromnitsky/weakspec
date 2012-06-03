@@ -1,6 +1,6 @@
-drw = if module then module.exports else window
+root = exports ? this
 
-class drw.Drawer
+class root.Drawer
     # spec must be validated with Pref* by WeakSpec
     constructor: (@spec) ->
         throw new Error 'no valid spec' unless @spec && @size() > 1

@@ -4,7 +4,7 @@ MOCHA := node_modules/.bin/mocha
 src := $(wildcard *.coffee)
 js := $(patsubst %.coffee,%.js,$(src))
 
-.PHONY: clean clobber compile test
+.PHONY: clean clobber compile test browser
 
 all: test
 
@@ -18,14 +18,18 @@ clobber: clean
 %.js: %.coffee
 	$(CS) -cp $< > $@
 
+browser:
+	$(MAKE) -C src $@
+
 clean:
-	rm -rf lib $(js)
+	rm -rf $(js)
+	$(MAKE) -C src clean
 
 lib:
 	mkdir -p $@
 
-compile: node_modules lib $(js)
-	$(MAKE) -C src
+compile: node_modules lib $(js) browser
+	$(MAKE) -C src compile
 
 test: compile
 	$(MOCHA) --compilers coffee:coffee-script -u tdd

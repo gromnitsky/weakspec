@@ -1,4 +1,4 @@
-{
+var weakspec = {
 	"Group 1" : {
 		"opt1" : {
 			"desc" : "Options #1 in group #1",

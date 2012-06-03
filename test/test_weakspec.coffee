@@ -26,112 +26,116 @@ check_val = (prefClass, opts, val, instructions) ->
 suite 'WeakSpec', ->
     setup ->
         process.chdir 'test' if path.basename(process.cwd()) != 'test'
-        this.spec01 = JSON.parse fs.readFileSync('example/01.json', "ascii")
-        this.ws01 = new ws.WeakSpec this.spec01
+#        @spec01 = JSON.parse fs.readFileSync('example/01.json', "ascii")
+#        @ws01 = new ws.WeakSpec @spec01
+        eval fs.readFileSync('example/01.json', "ascii")
+        @spec01 = weakspec
+        @ws01 = new ws.WeakSpec @spec01
 
-        this.min_string = {
+        @min_string = {
             "type" : null,
             "desc" : "z",
             "default" : ""
         }
-        this.min_int = {
+        @min_int = {
             "type" : null,
             "desc" : "zz",
             "default" : 42
         }
-        this.min_arrayofstr = {
+        @min_arrayofstr = {
             "type" : null,
             "desc" : "zzz",
             "default" : ['q', 'w', 'e']
         }
-        this.min_arrayofint = {
+        @min_arrayofint = {
             "type" : null,
             "desc" : "zzzz",
             "default" : [1, 2, 3]
         }
-        this.min_bool = {
+        @min_bool = {
             "type" : null,
             "desc" : "zzzzz",
             "default" : true
         }
 
-    test 'size of a spec must be == 4', ->
-        assert.equal 4, this.ws01.size()
+    test 'smoke test', ->
+        assert.equal 4, @ws01.size()
+        html = @ws01.toHtml()
+        assert.ok html.length > 10
 
     test 'char* validation ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefStr 'foo', 'bar', this.min_string).validate()
+            (new ws.PrefStr 'foo', 'bar', @min_string).validate()
 
-        check_val ws.PrefStr, ['allowEmpty'], false, this.min_string
+        check_val ws.PrefStr, ['allowEmpty'], false, @min_string
         
     test 'char* validation fail', ->
         assert.throws ->
             (new ws.PrefStr 'foo', 'bar', {}).validate()
         , /missing 'desc'/
         
-        check_bogusVal ws.PrefStr, ['default'], [], this.min_string
-        check_bogusVal ws.PrefStr, ['cleanByRegexp', 'validationRegexp'], 1, this.min_string
-        check_bogusVal ws.PrefStr, ['allowEmpty'], undefined, this.min_string
+        check_bogusVal ws.PrefStr, ['default'], [], @min_string
+        check_bogusVal ws.PrefStr, ['cleanByRegexp', 'validationRegexp'], 1, @min_string
+        check_bogusVal ws.PrefStr, ['allowEmpty'], undefined, @min_string
 
-        this.min_string.ooops = 1
+        @min_string.ooops = 1
         assert.throws =>
-            (new ws.PrefStr 'foo', 'bar', this.min_string).validate()
+            (new ws.PrefStr 'foo', 'bar', @min_string).validate()
         , /'ooops' is unknown/
-        delete this.min_string.ooops
+        delete @min_string.ooops
 
     test 'int validaion ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefInt 'foo', 'bar', this.min_int).validate()
+            (new ws.PrefInt 'foo', 'bar', @min_int).validate()
 
-        check_val ws.PrefInt, ['range'], [10, 100], this.min_int
+        check_val ws.PrefInt, ['range'], [10, 100], @min_int
 
     test 'int validation fail', ->
-        check_bogusVal ws.PrefInt, ['default'], '', this.min_int
-        check_bogusVal ws.PrefInt, ['range'], 'whoa', this.min_int
-        check_bogusVal ws.PrefInt, ['range'], [null], this.min_int
-        check_bogusVal ws.PrefInt, ['range'], [0], this.min_int
-        check_bogusVal ws.PrefInt, ['range'], [0, 1, 2], this.min_int
-        check_bogusVal ws.PrefInt, ['range'], [0, -1], this.min_int
+        check_bogusVal ws.PrefInt, ['default'], '', @min_int
+        check_bogusVal ws.PrefInt, ['range'], 'whoa', @min_int
+        check_bogusVal ws.PrefInt, ['range'], [null], @min_int
+        check_bogusVal ws.PrefInt, ['range'], [0], @min_int
+        check_bogusVal ws.PrefInt, ['range'], [0, 1, 2], @min_int
+        check_bogusVal ws.PrefInt, ['range'], [0, -1], @min_int
 
     test 'char** validation ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefArrayOfStr 'foo', 'bar', this.min_arrayofstr).validate()
+            (new ws.PrefArrayOfStr 'foo', 'bar', @min_arrayofstr).validate()
 
-        check_val ws.PrefArrayOfStr, ['size'], [1, 2], this.min_arrayofstr
+        check_val ws.PrefArrayOfStr, ['size'], [1, 2], @min_arrayofstr
 
     test 'char** validation fail', ->
-        check_bogusVal ws.PrefArrayOfStr, ['default'], 'whoa', this.min_arrayofstr
-        check_bogusVal ws.PrefArrayOfStr, ['default'], ['whoa', 1], this.min_arrayofstr
+        check_bogusVal ws.PrefArrayOfStr, ['default'], 'whoa', @min_arrayofstr
+        check_bogusVal ws.PrefArrayOfStr, ['default'], ['whoa', 1], @min_arrayofstr
 
-        check_bogusVal ws.PrefArrayOfStr, ['size'], 'whoa', this.min_arrayofstr
-        check_bogusVal ws.PrefArrayOfStr, ['size'], [1, null], this.min_arrayofstr
-        check_bogusVal ws.PrefArrayOfStr, ['size'], [-1, 1], this.min_arrayofstr
+        check_bogusVal ws.PrefArrayOfStr, ['size'], 'whoa', @min_arrayofstr
+        check_bogusVal ws.PrefArrayOfStr, ['size'], [1, null], @min_arrayofstr
+        check_bogusVal ws.PrefArrayOfStr, ['size'], [-1, 1], @min_arrayofstr
 
-        check_bogusVal ws.PrefArrayOfStr, ['cleanByRegexp', 'validationRegexp'], 1, this.min_arrayofstr
+        check_bogusVal ws.PrefArrayOfStr, ['cleanByRegexp', 'validationRegexp'], 1, @min_arrayofstr
 
     test 'int** validation ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefArrayOfInt 'foo', 'bar', this.min_arrayofint).validate()
+            (new ws.PrefArrayOfInt 'foo', 'bar', @min_arrayofint).validate()
 
-        check_val ws.PrefArrayOfInt, ['range'], [-1, 2], this.min_arrayofint
-        check_val ws.PrefArrayOfInt, ['size'], [1, 2], this.min_arrayofint
+        check_val ws.PrefArrayOfInt, ['range'], [-1, 2], @min_arrayofint
+        check_val ws.PrefArrayOfInt, ['size'], [1, 2], @min_arrayofint
 
     test 'int** validation fail', ->
-        check_bogusVal ws.PrefArrayOfInt, ['default'], 'whoa', this.min_arrayofint
-        check_bogusVal ws.PrefArrayOfInt, ['default'], ['whoa', 1], this.min_arrayofint
+        check_bogusVal ws.PrefArrayOfInt, ['default'], 'whoa', @min_arrayofint
+        check_bogusVal ws.PrefArrayOfInt, ['default'], ['whoa', 1], @min_arrayofint
 
-        check_bogusVal ws.PrefArrayOfInt, ['range'], [1, 0], this.min_arrayofint
+        check_bogusVal ws.PrefArrayOfInt, ['range'], [1, 0], @min_arrayofint
         
-        check_bogusVal ws.PrefArrayOfInt, ['size'], 'whoa', this.min_arrayofint
-        check_bogusVal ws.PrefArrayOfInt, ['size'], [1, null], this.min_arrayofint
-        check_bogusVal ws.PrefArrayOfInt, ['size'], [-1, 1], this.min_arrayofint
+        check_bogusVal ws.PrefArrayOfInt, ['size'], 'whoa', @min_arrayofint
+        check_bogusVal ws.PrefArrayOfInt, ['size'], [1, null], @min_arrayofint
+        check_bogusVal ws.PrefArrayOfInt, ['size'], [-1, 1], @min_arrayofint
 
     test 'bool validation ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefBool 'foo', 'bar', this.min_bool).validate()
+            (new ws.PrefBool 'foo', 'bar', @min_bool).validate()
 
-        check_val ws.PrefBool, ['default'], false, this.min_bool
+        check_val ws.PrefBool, ['default'], false, @min_bool
         
     test 'bool validation fail', ->
-        check_bogusVal ws.PrefBool, ['default'], 'whoa', this.min_bool
-        
+        check_bogusVal ws.PrefBool, ['default'], 'whoa', @min_bool
