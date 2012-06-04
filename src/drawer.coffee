@@ -20,8 +20,8 @@ class root.Drawer
             (html += @generatePref group, name, instr) for name, instr of opts
             
             html += "</table>\n<div>\n"+
-            "<button class='bReset' id='#{@uid(group, "", "bReset")}'>Reset</button>\n" +
             "<button class='bSave' id='#{@uid(group, "", "bSave")}'>Save</button>\n" +
+            "<button class='bReset' id='#{@uid(group, "", "bReset")}'>Reset</button>\n" +
             "</div>\n" +
             "</fieldset>\n\n"
         html

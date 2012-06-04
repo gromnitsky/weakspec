@@ -2,7 +2,7 @@ var weakspec = {
 	"Group 1" : {
 		"opt1" : {
 			"desc" : "Option #1 in group #1",
-			"help" : "A help string for an options #1",
+			"help" : "A help string for an options #1 in group 1",
 			"type" : "char*",
 			"default" : "ua",
 			"cleanByRegexp" : null,
@@ -13,7 +13,7 @@ var weakspec = {
 		},
 		"opt2" : {
 			"desc" : "Option #2 in group #1",
-			"help" : "A help string for an options #1",
+			"help" : "A help string for an options #2 in group 1",
 			"type" : "int",
 			"default" : 42,
 			"validationCallback" : null,
@@ -24,7 +24,6 @@ var weakspec = {
 	"Group 3" : {
 		"opt1" : {
 			"desc" : "Option #1 in group #3",
-			"help" : "A help string for an options #1",
 			"type" : "char**",
 			"default" : ["one", "two"],
 			"size" : [1, 4],
@@ -37,7 +36,7 @@ var weakspec = {
 	"Group 4" : {
 		"opt1" : {
 			"desc" : "Option #1 in group #4",
-			"help" : "A help string for an options #1",
+			"help" : "A help string for an options #1 in group 4",
 			"type" : "int**",
 			"default" : [1, 2],
 			"size" : [2, 2],
@@ -49,7 +48,7 @@ var weakspec = {
 	"Group 5" : {
 		"opt1" : {
 			"desc" : "Option #1 in group #5",
-			"help" : "A help string for an options #1",
+			"help" : "A help string for an options #1 in group 5",
 			"type" : "bool",
 			"default" : false
 		}
