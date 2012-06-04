@@ -1,8 +1,8 @@
 CS := coffee
 
 lib := ../lib
-src := $(wildcard *.coffee)
-js := $(patsubst %.coffee,$(lib)/%.js,$(src))
+coffee := $(wildcard *.coffee)
+js := $(patsubst %.coffee,$(lib)/%.js,$(coffee))
 browser := ../options.lib.js
 
 .PHONY: compile browser clean
@@ -17,10 +17,10 @@ $(lib):
 
 browser: $(browser)
 
-$(browser): $(src)
-	coffee -jcp $^ > $@
+$(browser): $(coffee)
+	$(CS) -jcp $^ > $@
 
-compile: $(lib) $(js) $(browser)
+compile: $(lib) $(js)
 
 clean:
 	rm -rf $(lib) $(browser)

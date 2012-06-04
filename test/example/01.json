@@ -1,7 +1,7 @@
 var weakspec = {
 	"Group 1" : {
 		"opt1" : {
-			"desc" : "Options #1 in group #1",
+			"desc" : "Option #1 in group #1",
 			"help" : "A help string for an options #1",
 			"type" : "char*",
 			"default" : "ua",
@@ -12,7 +12,7 @@ var weakspec = {
 			"allowEmpty" : true
 		},
 		"opt2" : {
-			"desc" : "Options #1 in group #1",
+			"desc" : "Option #2 in group #1",
 			"help" : "A help string for an options #1",
 			"type" : "int",
 			"default" : 42,
@@ -23,7 +23,7 @@ var weakspec = {
 	},
 	"Group 3" : {
 		"opt1" : {
-			"desc" : "Options #1 in group #3",
+			"desc" : "Option #1 in group #3",
 			"help" : "A help string for an options #1",
 			"type" : "char**",
 			"default" : ["one", "two"],
@@ -36,7 +36,7 @@ var weakspec = {
 	},
 	"Group 4" : {
 		"opt1" : {
-			"desc" : "Options #1 in group #4",
+			"desc" : "Option #1 in group #4",
 			"help" : "A help string for an options #1",
 			"type" : "int**",
 			"default" : [1, 2],
@@ -48,7 +48,7 @@ var weakspec = {
 	},
 	"Group 5" : {
 		"opt1" : {
-			"desc" : "Options #1 in group #5",
+			"desc" : "Option #1 in group #5",
 			"help" : "A help string for an options #1",
 			"type" : "bool",
 			"default" : false

@@ -3,7 +3,7 @@ errx = (msg) ->
     alert "Error: #{msg}"
 
 insertHtml = (html) ->
-    document.querySelector('div[id="options"]').innerHTML = html
+    document.querySelector('div[id="preferences"]').innerHTML = html
 
 window.onload = ->
     if typeof weakspec == 'undefined' || weakspec == null
@@ -17,3 +17,4 @@ window.onload = ->
         return
 
     insertHtml ws.toHtml()
+    document.querySelector('[id="searchbox"] input').focus()

@@ -1,0 +1,105 @@
+#searchbox {
+	float: left;
+}
+
+#showall {
+	float: right;
+}
+
+fieldset {
+	border: 1px solid #999;
+	margin: 0 0 8px 0;
+	padding: 0;
+	clear: both;
+	box-sizing: border-box;
+	width: 100%;
+	
+	position: relative;
+}
+
+fieldset div {
+	background: #f1f1f1;
+	padding: 5px 5px 4px 5px;
+	margin: 0 -1px -4px -1px;
+	border: 1px solid #999;
+	border-radius: 0 0 4px 4px;
+	border-top-color: rgba(0,0,0,0.1);
+}
+
+legend {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	padding: 0 10px 0 20px;
+	margin: 0 -1px;
+	font-weight: bold;
+	text-indent: -7px;
+	line-height: 1.7;
+	background: rgba(0,0,0,0.075) -o-linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0));
+	text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	-o-transition: 0.2s;
+}
+
+legend:hover {
+	box-shadow: 0 0 0 2px rgba(0,0,0,0.15);
+}
+
+table {
+	font-size: 100%;
+	border-spacing: 0;
+	border-collapse: collapse;
+	width: 100%;
+	margin: 0;
+}
+
+th {
+	text-align: left;
+	width: 50%;
+	padding: 5px 5px 5px 20px;
+	font-weight: normal;
+	border-bottom: none;
+}
+
+tr {
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+tr:nth-child(even) {
+	background-color: rgba(0,0,0,0.03);  
+}
+
+table td:nth-child(2) {
+	width: 30%;
+}
+
+table td:nth-child(3) {
+	text-align: right;
+}
+
+td {
+	text-align: left;
+	padding: 0.2em 1em 0.2em 0;
+	vertical-align: top; 
+}
+
+td a {
+	text-decoration: none;
+	margin: 0;
+	display: inline-block;
+	text-align: center;
+	line-height: 20px;
+	width: 18px;
+	height: 18px;
+	border-radius:4px;
+	color: #fff;
+	background: rgba(0,0,0,0.15);
+	text-shadow:0 -1px 0 rgba(0,0,0,0.15);
+	border:1px solid rgba(0,0,0,0.15);
+}
+
+td a:hover {
+	background: #5D9DF5;
+	color: #fff;
+}

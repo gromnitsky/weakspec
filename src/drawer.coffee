@@ -15,7 +15,7 @@ class root.Drawer
         for group, opts of @spec
             html += "<fieldset id='#{@uid(group, "", "group")}' class='cut'>\n" +
             "<legend>#{group}</legend>\n" +
-            "<table border='1'>\n"
+            "<table>\n"
             
             (html += @generatePref group, name, instr) for name, instr of opts
             
@@ -56,7 +56,7 @@ class root.Drawer
         throw new Error "invalid type '#{instr.type}'" unless mapping[instr.type]
 
         html = "<tr>\n" +
-        "<td>#{instr.desc}</td>\n" +
+        "<th>#{instr.desc}</th>\n" +
         "<td>\n"
         html += mapping[instr.type](group, name, instr)
         html += "</td>\n" +
