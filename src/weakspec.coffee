@@ -70,10 +70,14 @@ class Pref
             'desc' : (val) =>
                 this.isStr(val)
             ,
-            'default' : null,
             'type' : null
         }
-        @optional = { 'help' : null, 'cleanCallback' : null, 'validationCallback' : null }
+        @optional = {
+             'default' : null,  # we'll check it afterwards
+             'help' : null,
+             'cleanCallback' : null,
+             'validationCallback' : null }
+        @def = null
 
     validateSpec: ->
         for k of @req
@@ -83,6 +87,10 @@ class Pref
         for k of @instr when @req[k] == undefined
             throw new root.PrefError @group, @name, "'#{k}' is unknown" if @optional[k] == undefined
             throw new root.PrefError @group, @name, "invalid value in '#{k}'" if @optional[k] && @instr[k] != null && !@optional[k](@instr[k])
+
+        # we must check default values only at the end due to possible
+        # errors in other keys which are dependencies to @def() function.
+        throw new root.PrefError @group, @name, "invalid default '#{@instr['default']}'" unless @def @instr['default']
 
     isStr: (t) ->
         return false if typeof t != 'string'
@@ -110,15 +118,16 @@ class Pref
 
     validate: (value) ->
         return @instr.validationCallback(value) if @instr.validationCallback
-        @req['default'](value)
+        @def(value)
         
 
 class root.PrefStr extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @req['default'] = (val) =>
+        @def = (val) =>
             return false if typeof val != 'string'
             return false if val == '' && !@instr.allowEmpty
+            (return false unless val.match @instr.validationRegexp) if @instr.validationRegexp
             true
         
         @optional['cleanByRegexp'] = (val) =>
@@ -126,7 +135,6 @@ class root.PrefStr extends Pref
 
         @optional['validationRegexp'] = (val) =>
             this.isStr(val)
-            # TODO: validation
     
         @optional['allowEmpty'] = (val) =>
             this.isBoolean val
@@ -134,7 +142,7 @@ class root.PrefStr extends Pref
 class root.PrefInt extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @req['default'] = (val) =>
+        @def = (val) =>
             return false if typeof val != 'number'
             return false unless this.inRange(@instr.range, val)
             true
@@ -145,9 +153,11 @@ class root.PrefInt extends Pref
 class root.PrefArrayOfStr extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @req['default'] = (val) =>
+        @def = (val) =>
             return false unless val instanceof Array
-            (return false if typeof idx != 'string') for idx in val
+            for idx in val
+                (return false if typeof idx != 'string')
+                (return false unless idx.match @instr.validationRegexp) if @instr.validationRegexp
             return false unless this.inRange(@instr.size, val.length)
             true
 
@@ -164,7 +174,7 @@ class root.PrefArrayOfStr extends Pref
 class root.PrefArrayOfInt extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @req['default'] = (val) =>
+        @def = (val) =>
             return false unless val instanceof Array
             for idx in val
                 return false if typeof idx != 'number'
@@ -181,5 +191,5 @@ class root.PrefArrayOfInt extends Pref
 class root.PrefBool extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @req['default'] = (val) =>
+        @def = (val) =>
             this.isBoolean val

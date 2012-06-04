@@ -11,7 +11,7 @@ check_bogusVal = (prefClass, opts, bogusVal, instructions) ->
         instructions[idx] = bogusVal
         assert.throws ->
             (new prefClass 'foo', 'bar', instructions).validateSpec()
-        , /invalid value/
+        , /invalid/
         instructions[idx] = orig
 
 # opts--an array
@@ -140,8 +140,10 @@ suite 'WeakSpec', ->
 
     test 'char* validation', ->
         assert !@ws01.validate('Group 1', 'opt1', null)
-        assert @ws01.validate('Group 1', 'opt1', 'zzz')
+        assert !@ws01.validate('Group 1', 'opt1', 'zzz')
+        assert @ws01.validate('Group 1', 'opt1', 'zz')
 
+        @spec01['Group 1']['opt1'].validationRegexp = null
         @spec01['Group 1']['opt1'].allowEmpty = false
         assert !@ws01.validate('Group 1', 'opt1', '')
         @spec01['Group 1']['opt1'].allowEmpty = true
@@ -158,9 +160,9 @@ suite 'WeakSpec', ->
         assert !@ws01.validate('Group 3', 'opt1', [])
         assert !@ws01.validate('Group 3', 'opt1', 199)
         assert !@ws01.validate('Group 3', 'opt1', [1,2])
-        assert !@ws01.validate('Group 3', 'opt1', ['q e r', 'qqq', 'rrr'])
-        assert @ws01.validate('Group 3', 'opt1', ['q'])
-        assert @ws01.validate('Group 3', 'opt1', ['q e r', 'qqq'])
+        assert !@ws01.validate('Group 3', 'opt1', ['qer', 'qqq', 'rrr'])
+        assert @ws01.validate('Group 3', 'opt1', ['qqq'])
+        assert @ws01.validate('Group 3', 'opt1', ['qer', 'qqq'])
 
     test 'int** validation', ->
         assert !@ws01.validate('Group 4', 'opt1', 'whoa')
