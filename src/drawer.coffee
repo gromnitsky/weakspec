@@ -81,5 +81,5 @@ class root.Drawer
 
     pBool: (group, name, instr) =>
         checked = if instr.default then "checked='checked'" else ""
-        "<input type='checkbox' #{checked} id='#{@uid(group, name, "bool")}' />\n"
+        "<input class='pref' type='checkbox' #{checked} id='#{@uid(group, name, "bool")}' />\n"
         

@@ -25,32 +25,39 @@ class root.WeakSpec
     constructor: (@spec) ->
         throw new root.ParseError('the spec must contain at least 1 group') if @size() < 1
         for group, opts of @spec
-            @validate group, name, instr for name, instr of opts
+            @validateSpecPref group, name for name of opts
 
     size: ->
         n = 0
         n++ for k of @spec
         n
 
-    validate: (group, name, instr) ->
-        throw new root.PrefError group, name, "no type" unless instr.type
-        @validateUid group, name
-
-        mapping = {
+    mapping: (type) ->
+        {
             'char*' : root.PrefStr,
             'int' : root.PrefInt,
             'char**' : root.PrefArrayOfStr,
             'int**' : root.PrefArrayOfInt,
             'bool' : root.PrefBool
-        }
+        }[type]
 
-        throw new root.PrefError group, "invalid type '#{instr.type}'" unless mapping[instr.type]
-        (new mapping[instr.type](group, name, instr)).validate()
+    validateSpecPref: (group, name) ->
+        instr = @spec[group][name]
+        throw new root.PrefError group, name, "no type" unless instr.type
+        @validateUid group, name
+
+        throw new root.PrefError group, "invalid type '#{instr.type}'" unless @mapping instr.type
+        (new (@mapping instr.type)(group, name, instr) ).validateSpec()
 
     validateUid: (group, name) ->
         re = /^[A-Za-z0-9_,. -]+$/
         throw new root.ParseError "group: invalud value '#{group}'" unless group.match re
         throw new root.ParseError "group: '#{group}': name: invalud value '#{name}'" unless name.match re
+
+    validate: (group, name, value) ->
+        type = @spec[group]?[name]?.type
+        throw new Error "no type for #{group}->#{name}" unless type
+        (new (@mapping type)(group, name, @spec[group][name]) ).validate(value)
 
     toHtml: ->
         (new drw.Drawer @spec).draw()
@@ -68,7 +75,7 @@ class Pref
         }
         @optional = { 'help' : null, 'cleanCallback' : null, 'validationCallback' : null }
 
-    validate: ->
+    validateSpec: ->
         for k of @req
             throw new root.PrefError @group, @name, "missing '#{k}'" if @instr[k] == undefined
             throw new root.PrefError @group, @name, "invalid value in '#{k}'" if @req[k] && !@req[k](@instr[k])
@@ -95,6 +102,9 @@ class Pref
         return false unless this.isRange t
         return false if t[0] < 0
         true
+
+    validate: (value) ->
+        throw new Error 'override me'
         
 
 class root.PrefStr extends Pref
@@ -111,6 +121,12 @@ class root.PrefStr extends Pref
     
         @optional['allowEmpty'] = (val) =>
             this.isBoolean val
+
+    validate: (value) ->
+        return @instr.validationCallback(value) if @instr.validationCallback
+        return false unless @req['default'](value)
+        return false if value == '' && @instr.allowEmpty
+        true
 
 class root.PrefInt extends Pref
     constructor: (@group, @name, @instr) ->
@@ -158,3 +174,5 @@ class root.PrefBool extends Pref
         @req['default'] = (val) =>
             this.isBoolean val
 
+    validate: (value) ->
+        @req['default'](value)

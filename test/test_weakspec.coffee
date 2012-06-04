@@ -10,7 +10,7 @@ check_bogusVal = (prefClass, opts, bogusVal, instructions) ->
         orig = if instructions[idx] != undefined then instructions[idx] else null
         instructions[idx] = bogusVal
         assert.throws ->
-            (new prefClass 'foo', 'bar', instructions).validate()
+            (new prefClass 'foo', 'bar', instructions).validateSpec()
         , /invalid value/
         instructions[idx] = orig
 
@@ -20,7 +20,7 @@ check_val = (prefClass, opts, val, instructions) ->
         orig = if instructions[idx] != undefined then instructions[idx] else null
         instructions[idx] = val
         assert.doesNotThrow ->
-            (new prefClass 'foo', 'bar', instructions).validate()
+            (new prefClass 'foo', 'bar', instructions).validateSpec()
         instructions[idx] = orig
 
 suite 'WeakSpec', ->
@@ -63,15 +63,15 @@ suite 'WeakSpec', ->
         html = @ws01.toHtml()
         assert.ok html.length > 10
 
-    test 'char* validation ok', ->
+    test 'spec char* validation ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefStr 'foo', 'bar', @min_string).validate()
+            (new ws.PrefStr 'foo', 'bar', @min_string).validateSpec()
 
         check_val ws.PrefStr, ['allowEmpty'], false, @min_string
         
-    test 'char* validation fail', ->
+    test 'spec char* validation fail', ->
         assert.throws ->
-            (new ws.PrefStr 'foo', 'bar', {}).validate()
+            (new ws.PrefStr 'foo', 'bar', {}).validateSpec()
         , /missing 'desc'/
         
         check_bogusVal ws.PrefStr, ['default'], [], @min_string
@@ -80,17 +80,17 @@ suite 'WeakSpec', ->
 
         @min_string.ooops = 1
         assert.throws =>
-            (new ws.PrefStr 'foo', 'bar', @min_string).validate()
+            (new ws.PrefStr 'foo', 'bar', @min_string).validateSpec()
         , /'ooops' is unknown/
         delete @min_string.ooops
 
-    test 'int validaion ok', ->
+    test 'spec int validaion ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefInt 'foo', 'bar', @min_int).validate()
+            (new ws.PrefInt 'foo', 'bar', @min_int).validateSpec()
 
         check_val ws.PrefInt, ['range'], [10, 100], @min_int
 
-    test 'int validation fail', ->
+    test 'spec int validation fail', ->
         check_bogusVal ws.PrefInt, ['default'], '', @min_int
         check_bogusVal ws.PrefInt, ['range'], 'whoa', @min_int
         check_bogusVal ws.PrefInt, ['range'], [null], @min_int
@@ -98,13 +98,13 @@ suite 'WeakSpec', ->
         check_bogusVal ws.PrefInt, ['range'], [0, 1, 2], @min_int
         check_bogusVal ws.PrefInt, ['range'], [0, -1], @min_int
 
-    test 'char** validation ok', ->
+    test 'spec char** validation ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefArrayOfStr 'foo', 'bar', @min_arrayofstr).validate()
+            (new ws.PrefArrayOfStr 'foo', 'bar', @min_arrayofstr).validateSpec()
 
         check_val ws.PrefArrayOfStr, ['size'], [1, 2], @min_arrayofstr
 
-    test 'char** validation fail', ->
+    test 'spec char** validation fail', ->
         check_bogusVal ws.PrefArrayOfStr, ['default'], 'whoa', @min_arrayofstr
         check_bogusVal ws.PrefArrayOfStr, ['default'], ['whoa', 1], @min_arrayofstr
 
@@ -114,14 +114,14 @@ suite 'WeakSpec', ->
 
         check_bogusVal ws.PrefArrayOfStr, ['cleanByRegexp', 'validationRegexp'], 1, @min_arrayofstr
 
-    test 'int** validation ok', ->
+    test 'spec int** validation ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefArrayOfInt 'foo', 'bar', @min_arrayofint).validate()
+            (new ws.PrefArrayOfInt 'foo', 'bar', @min_arrayofint).validateSpec()
 
         check_val ws.PrefArrayOfInt, ['range'], [-1, 2], @min_arrayofint
         check_val ws.PrefArrayOfInt, ['size'], [1, 2], @min_arrayofint
 
-    test 'int** validation fail', ->
+    test 'spec int** validation fail', ->
         check_bogusVal ws.PrefArrayOfInt, ['default'], 'whoa', @min_arrayofint
         check_bogusVal ws.PrefArrayOfInt, ['default'], ['whoa', 1], @min_arrayofint
 
@@ -131,11 +131,20 @@ suite 'WeakSpec', ->
         check_bogusVal ws.PrefArrayOfInt, ['size'], [1, null], @min_arrayofint
         check_bogusVal ws.PrefArrayOfInt, ['size'], [-1, 1], @min_arrayofint
 
-    test 'bool validation ok', ->
+    test 'spec bool validation ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefBool 'foo', 'bar', @min_bool).validate()
+            (new ws.PrefBool 'foo', 'bar', @min_bool).validateSpec()
 
         check_val ws.PrefBool, ['default'], false, @min_bool
         
-    test 'bool validation fail', ->
+    test 'spec bool validation fail', ->
         check_bogusVal ws.PrefBool, ['default'], 'whoa', @min_bool
+
+    test 'char* validation', ->
+        assert !@ws01.validate('Group 1', 'opt1', null)
+        assert @ws01.validate('Group 1', 'opt1', 'zzz')
+
+    test 'bool validation', ->
+        assert !@ws01.validate('Group 5', 'opt1', 'whoa')
+        assert @ws01.validate('Group 5', 'opt1', false)
+
