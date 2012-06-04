@@ -50,7 +50,7 @@ suite 'WeakSpec', ->
         @min_arrayofint = {
             "type" : null,
             "desc" : "zzzz",
-            "default" : [1, 2, 3]
+            "default" : [-1, 2, 2]
         }
         @min_bool = {
             "type" : null,
@@ -64,10 +64,7 @@ suite 'WeakSpec', ->
         assert.ok html.length > 10
 
     test 'spec char* validation ok', ->
-        assert.doesNotThrow =>
-            (new ws.PrefStr 'foo', 'bar', @min_string).validateSpec()
-
-        check_val ws.PrefStr, ['allowEmpty'], false, @min_string
+        check_val ws.PrefStr, ['allowEmpty'], true, @min_string
         
     test 'spec char* validation fail', ->
         assert.throws ->
@@ -78,6 +75,7 @@ suite 'WeakSpec', ->
         check_bogusVal ws.PrefStr, ['cleanByRegexp', 'validationRegexp'], 1, @min_string
         check_bogusVal ws.PrefStr, ['allowEmpty'], undefined, @min_string
 
+        @min_string.default = "qwe"
         @min_string.ooops = 1
         assert.throws =>
             (new ws.PrefStr 'foo', 'bar', @min_string).validateSpec()
@@ -102,7 +100,7 @@ suite 'WeakSpec', ->
         assert.doesNotThrow =>
             (new ws.PrefArrayOfStr 'foo', 'bar', @min_arrayofstr).validateSpec()
 
-        check_val ws.PrefArrayOfStr, ['size'], [1, 2], @min_arrayofstr
+        check_val ws.PrefArrayOfStr, ['size'], [1, 3], @min_arrayofstr
 
     test 'spec char** validation fail', ->
         check_bogusVal ws.PrefArrayOfStr, ['default'], 'whoa', @min_arrayofstr
@@ -119,7 +117,7 @@ suite 'WeakSpec', ->
             (new ws.PrefArrayOfInt 'foo', 'bar', @min_arrayofint).validateSpec()
 
         check_val ws.PrefArrayOfInt, ['range'], [-1, 2], @min_arrayofint
-        check_val ws.PrefArrayOfInt, ['size'], [1, 2], @min_arrayofint
+        check_val ws.PrefArrayOfInt, ['size'], [1, 3], @min_arrayofint
 
     test 'spec int** validation fail', ->
         check_bogusVal ws.PrefArrayOfInt, ['default'], 'whoa', @min_arrayofint
@@ -143,6 +141,36 @@ suite 'WeakSpec', ->
     test 'char* validation', ->
         assert !@ws01.validate('Group 1', 'opt1', null)
         assert @ws01.validate('Group 1', 'opt1', 'zzz')
+
+        @spec01['Group 1']['opt1'].allowEmpty = false
+        assert !@ws01.validate('Group 1', 'opt1', '')
+        @spec01['Group 1']['opt1'].allowEmpty = true
+        assert @ws01.validate('Group 1', 'opt1', '')
+
+    test 'int validation', ->
+        assert !@ws01.validate('Group 1', 'opt2', 'whoa')
+        assert !@ws01.validate('Group 1', 'opt2', [])
+        assert !@ws01.validate('Group 1', 'opt2', 199)
+        assert @ws01.validate('Group 1', 'opt2', 99)
+
+    test 'char** validation', ->
+        assert !@ws01.validate('Group 3', 'opt1', 'whoa')
+        assert !@ws01.validate('Group 3', 'opt1', [])
+        assert !@ws01.validate('Group 3', 'opt1', 199)
+        assert !@ws01.validate('Group 3', 'opt1', [1,2])
+        assert !@ws01.validate('Group 3', 'opt1', ['q e r', 'qqq', 'rrr'])
+        assert @ws01.validate('Group 3', 'opt1', ['q'])
+        assert @ws01.validate('Group 3', 'opt1', ['q e r', 'qqq'])
+
+    test 'int** validation', ->
+        assert !@ws01.validate('Group 4', 'opt1', 'whoa')
+        assert !@ws01.validate('Group 4', 'opt1', [])
+        assert !@ws01.validate('Group 4', 'opt1', 199)
+        assert !@ws01.validate('Group 4', 'opt1', ['1',2])
+        assert !@ws01.validate('Group 4', 'opt1', [10, 11, 12])
+        assert !@ws01.validate('Group 4', 'opt1', [7])
+        assert !@ws01.validate('Group 4', 'opt1', [7, 9])
+        assert @ws01.validate('Group 4', 'opt1', [8, 9])
 
     test 'bool validation', ->
         assert !@ws01.validate('Group 5', 'opt1', 'whoa')

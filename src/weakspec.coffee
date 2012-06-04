@@ -98,41 +98,46 @@ class Pref
         return false if t[0] > t[1]
         true
 
+    inRange: (range, t) ->
+        return true if !range
+        [min, max] = range
+        t >= min && t <= max
+
     isSize: (t) ->
         return false unless this.isRange t
         return false if t[0] < 0
         true
 
     validate: (value) ->
-        throw new Error 'override me'
+        return @instr.validationCallback(value) if @instr.validationCallback
+        @req['default'](value)
         
 
 class root.PrefStr extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @req['default'] = (val) ->
-            typeof val == 'string'
+        @req['default'] = (val) =>
+            return false if typeof val != 'string'
+            return false if val == '' && !@instr.allowEmpty
+            true
         
         @optional['cleanByRegexp'] = (val) =>
             this.isStr(val)
 
         @optional['validationRegexp'] = (val) =>
             this.isStr(val)
+            # TODO: validation
     
         @optional['allowEmpty'] = (val) =>
             this.isBoolean val
 
-    validate: (value) ->
-        return @instr.validationCallback(value) if @instr.validationCallback
-        return false unless @req['default'](value)
-        return false if value == '' && @instr.allowEmpty
-        true
-
 class root.PrefInt extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @req['default'] = (val) ->
-            typeof val == 'number'
+        @req['default'] = (val) =>
+            return false if typeof val != 'number'
+            return false unless this.inRange(@instr.range, val)
+            true
             
         @optional['range'] = (val) =>
             this.isRange val
@@ -140,9 +145,10 @@ class root.PrefInt extends Pref
 class root.PrefArrayOfStr extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @req['default'] = (val) ->
+        @req['default'] = (val) =>
             return false unless val instanceof Array
             (return false if typeof idx != 'string') for idx in val
+            return false unless this.inRange(@instr.size, val.length)
             true
 
         @optional['cleanByRegexp'] = (val) =>
@@ -150,6 +156,7 @@ class root.PrefArrayOfStr extends Pref
 
         @optional['validationRegexp'] = (val) =>
             this.isStr val
+            # TODO: validation
 
         @optional['size'] = (val) =>
             this.isSize val
@@ -157,9 +164,12 @@ class root.PrefArrayOfStr extends Pref
 class root.PrefArrayOfInt extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @req['default'] = (val) ->
+        @req['default'] = (val) =>
             return false unless val instanceof Array
-            (return false if typeof idx != 'number') for idx in val
+            for idx in val
+                return false if typeof idx != 'number'
+                return false unless this.inRange @instr.range, idx
+            return false unless this.inRange(@instr.size, val.length)
             true
 
         @optional['range'] = (val) =>
@@ -173,6 +183,3 @@ class root.PrefBool extends Pref
         super @group, @name, @instr
         @req['default'] = (val) =>
             this.isBoolean val
-
-    validate: (value) ->
-        @req['default'](value)
