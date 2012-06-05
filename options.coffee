@@ -46,7 +46,6 @@ class EPref
             'char*' : @pString,
             'int' : @pInt,
             'char**' : @pArrayOfString,
-            'int**' : @pArrayOfInt,
             'bool' : @pBool
         }[type] || throw new Error "no mapping method for type #{type}"
 

@@ -37,7 +37,6 @@ class root.WeakSpec
         throw new root.PrefError group, name, "no type" unless instr.type
         @_validateUid group, name
 
-        throw new root.PrefError group, "invalid type '#{instr.type}'" unless @_mapping instr.type
         (new (@_mapping instr.type)(group, name, instr) ).validateSpec()
 
     _mapping: (type) ->
@@ -45,9 +44,8 @@ class root.WeakSpec
             'char*' : root.PrefStr,
             'int' : root.PrefInt,
             'char**' : root.PrefArrayOfStr,
-            'int**' : root.PrefArrayOfInt,
             'bool' : root.PrefBool
-        }[type]
+        }[type] || throw new root.PrefError group, "no method for '#{instr.type}' type"
 
     _validateUid: (group, name) ->
         re = /^[A-Za-z0-9_,. -]+$/
@@ -72,12 +70,11 @@ class Pref
             ,
             'type' : null
         }
-        @optional = {
-             'default' : null,  # we'll check it afterwards
-             'help' : null,
-             'cleanCallback' : null,
-             'validationCallback' : null }
-        @def = null
+        @local = {
+            'help' : null,
+            'validationCallback' : null,
+            'default' : null
+        }
 
     validateSpec: ->
         for k of @req
@@ -85,12 +82,8 @@ class Pref
             throw new root.PrefError @group, @name, "invalid value in '#{k}'" if @req[k] && !@req[k](@instr[k])
 
         for k of @instr when @req[k] == undefined
-            throw new root.PrefError @group, @name, "'#{k}' is unknown" if @optional[k] == undefined
-            throw new root.PrefError @group, @name, "invalid value in '#{k}'" if @optional[k] && @instr[k] != null && !@optional[k](@instr[k])
-
-        # we must check default values only at the end due to possible
-        # errors in other keys which are dependencies to @def() function.
-        throw new root.PrefError @group, @name, "invalid default '#{@instr['default']}'" unless @def @instr['default']
+            throw new root.PrefError @group, @name, "'#{k}' is unknown" if @local[k] == undefined
+            throw new root.PrefError @group, @name, "invalid value in '#{k}'" if @local[k] && @instr[k] != null && !@local[k](@instr[k])
 
     isStr: (t) ->
         return false if typeof t != 'string'
@@ -99,8 +92,11 @@ class Pref
     isBoolean: (t) ->
         typeof t == 'boolean'
 
-    isRange: (t) ->
-        return false unless t instanceof Array
+    isArray: (t) ->
+        t instanceof Array
+
+    isRange: (t) =>
+        return false unless @isArray t
         return false if t.length != 2
         (return false if typeof idx != 'number') for idx in t
         return false if t[0] > t[1]
@@ -111,85 +107,66 @@ class Pref
         [min, max] = range
         t >= min && t <= max
 
-    isSize: (t) ->
-        return false unless this.isRange t
-        return false if t[0] < 0
-        true
-
     validate: (value) ->
         return @instr.validationCallback(value) if @instr.validationCallback
-        @def(value)
+        @local['default'](value)
         
 
 class root.PrefStr extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @def = (val) =>
+
+        @local['validationRegexp'] = (val) =>
+            this.isStr(val)
+    
+        @local['allowEmpty'] = (val) =>
+            this.isBoolean val
+
+        @local['default'] = (val) =>
             return false if typeof val != 'string'
             return false if val == '' && !@instr.allowEmpty
             (return false unless val.match @instr.validationRegexp) if @instr.validationRegexp
             true
         
-        @optional['cleanByRegexp'] = (val) =>
-            this.isStr(val)
-
-        @optional['validationRegexp'] = (val) =>
-            this.isStr(val)
-    
-        @optional['allowEmpty'] = (val) =>
-            this.isBoolean val
 
 class root.PrefInt extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @def = (val) =>
+            
+        @local['range'] = (val) =>
+            this.isRange val
+
+        @local['default'] = (val) =>
             return false if typeof val != 'number'
             return false unless this.inRange(@instr.range, val)
             true
-            
-        @optional['range'] = (val) =>
-            this.isRange val
 
 class root.PrefArrayOfStr extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @def = (val) =>
-            return false unless val instanceof Array
-            for idx in val
-                (return false if typeof idx != 'string')
-                (return false unless idx.match @instr.validationRegexp) if @instr.validationRegexp
-            return false unless this.inRange(@instr.size, val.length)
+        @local['data'] = (val) =>
+            return false unless @isArray val
             true
 
-        @optional['cleanByRegexp'] = (val) =>
-            this.isStr val
-
-        @optional['validationRegexp'] = (val) =>
-            this.isStr val
-            # TODO: validation
-
-        @optional['size'] = (val) =>
-            this.isSize val
-
-class root.PrefArrayOfInt extends Pref
-    constructor: (@group, @name, @instr) ->
-        super @group, @name, @instr
-        @def = (val) =>
-            return false unless val instanceof Array
-            for idx in val
-                return false if typeof idx != 'number'
-                return false unless this.inRange @instr.range, idx
-            return false unless this.inRange(@instr.size, val.length)
+        @local['selectedSize'] = (val) =>
+            return false unless @isArray val
+            return false unless @isRange @instr.selectedSize
+            return false unless val[0] <= @instr.data.length && \
+                val[1] <= @instr.data.length && \
+                val[0] > 0 && val[1] > 0
             true
 
-        @optional['range'] = (val) =>
-            this.isRange val
+        @local['default'] = (val) =>
+            return false unless @isArray(val) && val.length
+            return false unless @isArray @instr.data
+            (return false unless idx in @instr.data) for idx in val
+            return false unless val.length <= @instr.selectedSize[1]
+            true
 
-        @optional['size'] = (val) =>
-            this.isSize val
 
 class root.PrefBool extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @def = (val) =>
+
+        @local['default'] = (val) =>
             this.isBoolean val

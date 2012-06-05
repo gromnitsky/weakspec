@@ -37,7 +37,6 @@ class root.Drawer
             when 'char*' then "#{group}|#{name}|pString"
             when 'int' then "#{group}|#{name}|pInt"
             when 'char**' then "#{group}|#{name}|pArrayOfString"
-            when 'int**' then "#{group}|#{name}|pArrayOfInt"
             when 'bool' then "#{group}|#{name}|pBool"
             else
                 new Error "invalid uid type '#{type}'"
@@ -49,7 +48,6 @@ class root.Drawer
             'char*' : @pString,
             'int' : @pInteger,
             'char**' : @pArrayOfString,
-            'int**' : @pArrayOfInt,
             'bool' : @pBool
         }
 
@@ -78,9 +76,6 @@ class root.Drawer
 
     pArrayOfString: (group, name, instr) ->
         'aos'
-
-    pArrayOfInt: (group, name, instr) ->
-        'aoi'
 
     pBool: (group, name, instr) =>
         "<input class='pref' type='checkbox' id='#{@uid(group, name, "bool")}'>\n"

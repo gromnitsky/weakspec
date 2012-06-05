@@ -1,6 +1,7 @@
 fs = require 'fs'
 path = require 'path'
 assert = require 'assert'
+util = require 'util'
 
 ws = require '../lib/weakspec'
 
@@ -11,7 +12,7 @@ check_bogusVal = (prefClass, opts, bogusVal, instructions) ->
         instructions[idx] = bogusVal
         assert.throws ->
             (new prefClass 'foo', 'bar', instructions).validateSpec()
-        , /invalid/
+        , ws.PrefError, "opts=#{util.inspect opts}; bogusVal=#{util.inspect bogusVal}"
         instructions[idx] = orig
 
 # opts--an array
@@ -26,8 +27,7 @@ check_val = (prefClass, opts, val, instructions) ->
 suite 'WeakSpec', ->
     setup ->
         process.chdir 'test' if path.basename(process.cwd()) != 'test'
-#        @spec01 = JSON.parse fs.readFileSync('example/01.json', "ascii")
-#        @ws01 = new ws.WeakSpec @spec01
+        
         eval fs.readFileSync('example/01.json', "ascii")
         @spec01 = weakspec
         @ws01 = new ws.WeakSpec @spec01
@@ -42,15 +42,19 @@ suite 'WeakSpec', ->
             "desc" : "zz",
             "default" : 42
         }
-        @min_arrayofstr = {
+        @min_arrayofstr_multi = {
             "type" : null,
             "desc" : "zzz",
-            "default" : ['q', 'w', 'e']
+            "default" : ['w', 'e']
+            "data" : ['q', 'w', 'e']
+            "selectedSize" : [1, 3]
         }
-        @min_arrayofint = {
+        @min_arrayofstr_single = {
             "type" : null,
-            "desc" : "zzzz",
-            "default" : [-1, 2, 2]
+            "desc" : "zzz",
+            "default" : ['w']
+            "data" : ['q', 'w', 'e']
+            "selectedSize" : [1, 1]
         }
         @min_bool = {
             "type" : null,
@@ -72,7 +76,7 @@ suite 'WeakSpec', ->
         , /missing 'desc'/
         
         check_bogusVal ws.PrefStr, ['default'], [], @min_string
-        check_bogusVal ws.PrefStr, ['cleanByRegexp', 'validationRegexp'], 1, @min_string
+        check_bogusVal ws.PrefStr, ['validationRegexp'], 1, @min_string
         check_bogusVal ws.PrefStr, ['allowEmpty'], undefined, @min_string
 
         @min_string.default = "qwe"
@@ -98,37 +102,38 @@ suite 'WeakSpec', ->
 
     test 'spec char** validation ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefArrayOfStr 'foo', 'bar', @min_arrayofstr).validateSpec()
+          (new ws.PrefArrayOfStr 'foo', 'bar', @min_arrayofstr_multi).validateSpec()
+        assert.doesNotThrow =>
+            (new ws.PrefArrayOfStr 'foo', 'bar', @min_arrayofstr_single).validateSpec()
 
-        check_val ws.PrefArrayOfStr, ['size'], [1, 3], @min_arrayofstr
+        check_val ws.PrefArrayOfStr, ['selectedSize'], [1, 2], @min_arrayofstr_multi
+        check_val ws.PrefArrayOfStr, ['selectedSize'], [1, 1], @min_arrayofstr_single
+        check_val ws.PrefArrayOfStr, ['selectedSize'], [1, 2], @min_arrayofstr_single
+
+        check_val ws.PrefArrayOfStr, ['default'], ['q'], @min_arrayofstr_multi
+        check_val ws.PrefArrayOfStr, ['default'], ['q', 'w', 'e'], @min_arrayofstr_multi
+        check_val ws.PrefArrayOfStr, ['default'], ['w'], @min_arrayofstr_single
+
+        check_val ws.PrefArrayOfStr, ['data'], ['e', 'w', 'q', 'r'], @min_arrayofstr_multi
 
     test 'spec char** validation fail', ->
-        check_bogusVal ws.PrefArrayOfStr, ['default'], 'whoa', @min_arrayofstr
-        check_bogusVal ws.PrefArrayOfStr, ['default'], ['whoa', 1], @min_arrayofstr
+        check_bogusVal ws.PrefArrayOfStr, ['default'], 'whoa', @min_arrayofstr_multi
+        check_bogusVal ws.PrefArrayOfStr, ['default'], [], @min_arrayofstr_multi
+        check_bogusVal ws.PrefArrayOfStr, ['default'], ['q', 1], @min_arrayofstr_multi
+        check_bogusVal ws.PrefArrayOfStr, ['default'], ['q', 'whoa'], @min_arrayofstr_multi
+        check_bogusVal ws.PrefArrayOfStr, ['default'], ['q', 'w'], @min_arrayofstr_single
 
-        check_bogusVal ws.PrefArrayOfStr, ['size'], 'whoa', @min_arrayofstr
-        check_bogusVal ws.PrefArrayOfStr, ['size'], [1, null], @min_arrayofstr
-        check_bogusVal ws.PrefArrayOfStr, ['size'], [-1, 1], @min_arrayofstr
+        check_bogusVal ws.PrefArrayOfStr, ['selectedSize'], 'whoa', @min_arrayofstr_multi
+        check_bogusVal ws.PrefArrayOfStr, ['selectedSize'], [1, 1], @min_arrayofstr_multi
+        check_bogusVal ws.PrefArrayOfStr, ['selectedSize'], [1, null], @min_arrayofstr_multi
+        check_bogusVal ws.PrefArrayOfStr, ['selectedSize'], [-1, 1], @min_arrayofstr_multi
+        check_bogusVal ws.PrefArrayOfStr, ['selectedSize'], [1, 33], @min_arrayofstr_multi
 
-        check_bogusVal ws.PrefArrayOfStr, ['cleanByRegexp', 'validationRegexp'], 1, @min_arrayofstr
-
-    test 'spec int** validation ok', ->
-        assert.doesNotThrow =>
-            (new ws.PrefArrayOfInt 'foo', 'bar', @min_arrayofint).validateSpec()
-
-        check_val ws.PrefArrayOfInt, ['range'], [-1, 2], @min_arrayofint
-        check_val ws.PrefArrayOfInt, ['size'], [1, 3], @min_arrayofint
-
-    test 'spec int** validation fail', ->
-        check_bogusVal ws.PrefArrayOfInt, ['default'], 'whoa', @min_arrayofint
-        check_bogusVal ws.PrefArrayOfInt, ['default'], ['whoa', 1], @min_arrayofint
-
-        check_bogusVal ws.PrefArrayOfInt, ['range'], [1, 0], @min_arrayofint
+        check_bogusVal ws.PrefArrayOfStr, ['data'], 'whoa', @min_arrayofstr_multi
+        check_bogusVal ws.PrefArrayOfStr, ['data'], undefined, @min_arrayofstr_multi
+        check_bogusVal ws.PrefArrayOfStr, ['data'], [], @min_arrayofstr_multi
+        check_bogusVal ws.PrefArrayOfStr, ['data'], [1, 2, 3, 4], @min_arrayofstr_multi
         
-        check_bogusVal ws.PrefArrayOfInt, ['size'], 'whoa', @min_arrayofint
-        check_bogusVal ws.PrefArrayOfInt, ['size'], [1, null], @min_arrayofint
-        check_bogusVal ws.PrefArrayOfInt, ['size'], [-1, 1], @min_arrayofint
-
     test 'spec bool validation ok', ->
         assert.doesNotThrow =>
             (new ws.PrefBool 'foo', 'bar', @min_bool).validateSpec()
@@ -159,20 +164,15 @@ suite 'WeakSpec', ->
         assert !@ws01.validate('Group 3', 'opt1', 'whoa')
         assert !@ws01.validate('Group 3', 'opt1', [])
         assert !@ws01.validate('Group 3', 'opt1', 199)
-        assert !@ws01.validate('Group 3', 'opt1', [1,2])
-        assert !@ws01.validate('Group 3', 'opt1', ['qer', 'qqq', 'rrr'])
-        assert @ws01.validate('Group 3', 'opt1', ['qqq'])
-        assert @ws01.validate('Group 3', 'opt1', ['qer', 'qqq'])
+        assert !@ws01.validate('Group 3', 'opt1', [1, 2])
+        assert !@ws01.validate('Group 3', 'opt1', ['qqq', 'www', 'eee'])
+        assert !@ws01.validate('Group 3', 'opt1', ['one', 'two', 'three'])
+        assert @ws01.validate('Group 3', 'opt1', ['one'])
+        assert @ws01.validate('Group 3', 'opt1', ['one', 'two'])
 
-    test 'int** validation', ->
-        assert !@ws01.validate('Group 4', 'opt1', 'whoa')
-        assert !@ws01.validate('Group 4', 'opt1', [])
-        assert !@ws01.validate('Group 4', 'opt1', 199)
-        assert !@ws01.validate('Group 4', 'opt1', ['1',2])
-        assert !@ws01.validate('Group 4', 'opt1', [10, 11, 12])
-        assert !@ws01.validate('Group 4', 'opt1', [7])
-        assert !@ws01.validate('Group 4', 'opt1', [7, 9])
-        assert @ws01.validate('Group 4', 'opt1', [8, 9])
+        assert !@ws01.validate('Group 4', 'opt1', ['five', 'six'])
+        assert !@ws01.validate('Group 4', 'opt1', ['qwe'])
+        assert @ws01.validate('Group 4', 'opt1', ['seven'])
 
     test 'bool validation', ->
         assert !@ws01.validate('Group 5', 'opt1', 'whoa')

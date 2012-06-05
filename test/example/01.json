@@ -5,8 +5,6 @@ var weakspec = {
 			"help" : "A help string for an options #1 in group 1",
 			"type" : "char*",
 			"default" : "ua",
-			"cleanByRegexp" : null,
-			"cleanCallback" : null,
 			"validationRegexp" : "^[a-z]{2}$",
 			"validationCallback" : null,
 			"allowEmpty" : true
@@ -17,7 +15,6 @@ var weakspec = {
 			"type" : "int",
 			"default" : 42,
 			"validationCallback" : null,
-			"cleanCallback" : null,
 			"range" : [0, 127]
 		}
 	},
@@ -26,23 +23,20 @@ var weakspec = {
 			"desc" : "Option #1 in group #3",
 			"type" : "char**",
 			"default" : ["one", "two"],
-			"size" : [1, 2],
-			"cleanByRegexp" : null,
-			"cleanCallback" : null,
+			"selectedSize" : [1, 2],
 			"validationCallback" : null,
-			"validationRegexp" : "^[a-z]{3}$"
+			"data" : ["one", "two", "three", "four"]
 		}
 	},
 	"Group 4" : {
 		"opt1" : {
 			"desc" : "Option #1 in group #4",
 			"help" : "A help string for an options #1 in group 4",
-			"type" : "int**",
-			"default" : [8, 9],
-			"size" : [2, 2],
-			"cleanCallback" : null,
+			"type" : "char**",
+			"default" : ["six"],
+			"selectedSize" : [1, 1],
 			"validationCallback" : null,
-			"range" : [8, 16]
+			"data" : ["five", "six", "seven"]
 		}
 	},
 	"Group 5" : {
