@@ -21,7 +21,7 @@ var weakspec = {
 	"Group 3" : {
 		"opt1" : {
 			"desc" : "Option #1 in group #3",
-			"type" : "char**",
+			"type" : "list",
 			"default" : ["one", "two"],
 			"selectedSize" : [1, 2],
 			"validationCallback" : null,
@@ -32,7 +32,7 @@ var weakspec = {
 		"opt1" : {
 			"desc" : "Option #1 in group #4",
 			"help" : "A help string for an options #1 in group 4",
-			"type" : "char**",
+			"type" : "list",
 			"default" : ["six"],
 			"selectedSize" : [1, 1],
 			"validationCallback" : null,

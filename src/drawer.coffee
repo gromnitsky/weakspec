@@ -36,7 +36,7 @@ class root.Drawer
             
             when 'char*' then "#{group}|#{name}|pString"
             when 'int' then "#{group}|#{name}|pInt"
-            when 'char**' then "#{group}|#{name}|pArrayOfString"
+            when 'list' then "#{group}|#{name}|pList"
             when 'bool' then "#{group}|#{name}|pBool"
             else
                 new Error "invalid uid type '#{type}'"
@@ -47,7 +47,7 @@ class root.Drawer
         mapping = {
             'char*' : @pString,
             'int' : @pInteger,
-            'char**' : @pArrayOfString,
+            'list' : @pList,
             'bool' : @pBool
         }
 
@@ -74,8 +74,8 @@ class root.Drawer
         max = if instr.range then  "max='#{instr.range[1]}'" else ""
         "<input class='pref' type='number' #{min} #{max} id='#{@uid(group, name, "int")}'>\n"
 
-    pArrayOfString: (group, name, instr) ->
-        'aos'
+    pList: (group, name, instr) ->
+        'list'
 
     pBool: (group, name, instr) =>
         "<input class='pref' type='checkbox' id='#{@uid(group, name, "bool")}'>\n"

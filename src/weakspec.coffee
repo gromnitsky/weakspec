@@ -43,7 +43,7 @@ class root.WeakSpec
         {
             'char*' : root.PrefStr,
             'int' : root.PrefInt,
-            'char**' : root.PrefArrayOfStr,
+            'list' : root.PrefList,
             'bool' : root.PrefBool
         }[type] || throw new root.PrefError group, "no method for '#{instr.type}' type"
 
@@ -141,7 +141,7 @@ class root.PrefInt extends Pref
             return false unless this.inRange(@instr.range, val)
             true
 
-class root.PrefArrayOfStr extends Pref
+class root.PrefList extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
         @local['data'] = (val) =>

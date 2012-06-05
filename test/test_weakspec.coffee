@@ -42,14 +42,14 @@ suite 'WeakSpec', ->
             "desc" : "zz",
             "default" : 42
         }
-        @min_arrayofstr_multi = {
+        @min_list_multi = {
             "type" : null,
             "desc" : "zzz",
             "default" : ['w', 'e']
             "data" : ['q', 'w', 'e']
             "selectedSize" : [1, 3]
         }
-        @min_arrayofstr_single = {
+        @min_list_single = {
             "type" : null,
             "desc" : "zzz",
             "default" : ['w']
@@ -100,39 +100,39 @@ suite 'WeakSpec', ->
         check_bogusVal ws.PrefInt, ['range'], [0, 1, 2], @min_int
         check_bogusVal ws.PrefInt, ['range'], [0, -1], @min_int
 
-    test 'spec char** validation ok', ->
+    test 'spec list validation ok', ->
         assert.doesNotThrow =>
-          (new ws.PrefArrayOfStr 'foo', 'bar', @min_arrayofstr_multi).validateSpec()
+          (new ws.PrefList 'foo', 'bar', @min_list_multi).validateSpec()
         assert.doesNotThrow =>
-            (new ws.PrefArrayOfStr 'foo', 'bar', @min_arrayofstr_single).validateSpec()
+            (new ws.PrefList 'foo', 'bar', @min_list_single).validateSpec()
 
-        check_val ws.PrefArrayOfStr, ['selectedSize'], [1, 2], @min_arrayofstr_multi
-        check_val ws.PrefArrayOfStr, ['selectedSize'], [1, 1], @min_arrayofstr_single
-        check_val ws.PrefArrayOfStr, ['selectedSize'], [1, 2], @min_arrayofstr_single
+        check_val ws.PrefList, ['selectedSize'], [1, 2], @min_list_multi
+        check_val ws.PrefList, ['selectedSize'], [1, 1], @min_list_single
+        check_val ws.PrefList, ['selectedSize'], [1, 2], @min_list_single
 
-        check_val ws.PrefArrayOfStr, ['default'], ['q'], @min_arrayofstr_multi
-        check_val ws.PrefArrayOfStr, ['default'], ['q', 'w', 'e'], @min_arrayofstr_multi
-        check_val ws.PrefArrayOfStr, ['default'], ['w'], @min_arrayofstr_single
+        check_val ws.PrefList, ['default'], ['q'], @min_list_multi
+        check_val ws.PrefList, ['default'], ['q', 'w', 'e'], @min_list_multi
+        check_val ws.PrefList, ['default'], ['w'], @min_list_single
 
-        check_val ws.PrefArrayOfStr, ['data'], ['e', 'w', 'q', 'r'], @min_arrayofstr_multi
+        check_val ws.PrefList, ['data'], ['e', 'w', 'q', 'r'], @min_list_multi
 
-    test 'spec char** validation fail', ->
-        check_bogusVal ws.PrefArrayOfStr, ['default'], 'whoa', @min_arrayofstr_multi
-        check_bogusVal ws.PrefArrayOfStr, ['default'], [], @min_arrayofstr_multi
-        check_bogusVal ws.PrefArrayOfStr, ['default'], ['q', 1], @min_arrayofstr_multi
-        check_bogusVal ws.PrefArrayOfStr, ['default'], ['q', 'whoa'], @min_arrayofstr_multi
-        check_bogusVal ws.PrefArrayOfStr, ['default'], ['q', 'w'], @min_arrayofstr_single
+    test 'spec list validation fail', ->
+        check_bogusVal ws.PrefList, ['default'], 'whoa', @min_list_multi
+        check_bogusVal ws.PrefList, ['default'], [], @min_list_multi
+        check_bogusVal ws.PrefList, ['default'], ['q', 1], @min_list_multi
+        check_bogusVal ws.PrefList, ['default'], ['q', 'whoa'], @min_list_multi
+        check_bogusVal ws.PrefList, ['default'], ['q', 'w'], @min_list_single
 
-        check_bogusVal ws.PrefArrayOfStr, ['selectedSize'], 'whoa', @min_arrayofstr_multi
-        check_bogusVal ws.PrefArrayOfStr, ['selectedSize'], [1, 1], @min_arrayofstr_multi
-        check_bogusVal ws.PrefArrayOfStr, ['selectedSize'], [1, null], @min_arrayofstr_multi
-        check_bogusVal ws.PrefArrayOfStr, ['selectedSize'], [-1, 1], @min_arrayofstr_multi
-        check_bogusVal ws.PrefArrayOfStr, ['selectedSize'], [1, 33], @min_arrayofstr_multi
+        check_bogusVal ws.PrefList, ['selectedSize'], 'whoa', @min_list_multi
+        check_bogusVal ws.PrefList, ['selectedSize'], [1, 1], @min_list_multi
+        check_bogusVal ws.PrefList, ['selectedSize'], [1, null], @min_list_multi
+        check_bogusVal ws.PrefList, ['selectedSize'], [-1, 1], @min_list_multi
+        check_bogusVal ws.PrefList, ['selectedSize'], [1, 33], @min_list_multi
 
-        check_bogusVal ws.PrefArrayOfStr, ['data'], 'whoa', @min_arrayofstr_multi
-        check_bogusVal ws.PrefArrayOfStr, ['data'], undefined, @min_arrayofstr_multi
-        check_bogusVal ws.PrefArrayOfStr, ['data'], [], @min_arrayofstr_multi
-        check_bogusVal ws.PrefArrayOfStr, ['data'], [1, 2, 3, 4], @min_arrayofstr_multi
+        check_bogusVal ws.PrefList, ['data'], 'whoa', @min_list_multi
+        check_bogusVal ws.PrefList, ['data'], undefined, @min_list_multi
+        check_bogusVal ws.PrefList, ['data'], [], @min_list_multi
+        check_bogusVal ws.PrefList, ['data'], [1, 2, 3, 4], @min_list_multi
         
     test 'spec bool validation ok', ->
         assert.doesNotThrow =>
@@ -160,7 +160,7 @@ suite 'WeakSpec', ->
         assert !@ws01.validate('Group 1', 'opt2', 199)
         assert @ws01.validate('Group 1', 'opt2', 99)
 
-    test 'char** validation', ->
+    test 'list validation', ->
         assert !@ws01.validate('Group 3', 'opt1', 'whoa')
         assert !@ws01.validate('Group 3', 'opt1', [])
         assert !@ws01.validate('Group 3', 'opt1', 199)
