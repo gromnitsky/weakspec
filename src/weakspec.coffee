@@ -32,7 +32,15 @@ class root.WeakSpec
         n++ for k of @spec
         n
 
-    mapping: (type) ->
+    validateSpecPref: (group, name) ->
+        instr = @spec[group][name]
+        throw new root.PrefError group, name, "no type" unless instr.type
+        @_validateUid group, name
+
+        throw new root.PrefError group, "invalid type '#{instr.type}'" unless @_mapping instr.type
+        (new (@_mapping instr.type)(group, name, instr) ).validateSpec()
+
+    _mapping: (type) ->
         {
             'char*' : root.PrefStr,
             'int' : root.PrefInt,
@@ -41,15 +49,7 @@ class root.WeakSpec
             'bool' : root.PrefBool
         }[type]
 
-    validateSpecPref: (group, name) ->
-        instr = @spec[group][name]
-        throw new root.PrefError group, name, "no type" unless instr.type
-        @validateUid group, name
-
-        throw new root.PrefError group, "invalid type '#{instr.type}'" unless @mapping instr.type
-        (new (@mapping instr.type)(group, name, instr) ).validateSpec()
-
-    validateUid: (group, name) ->
+    _validateUid: (group, name) ->
         re = /^[A-Za-z0-9_,. -]+$/
         throw new root.ParseError "group: invalud value '#{group}'" unless group.match re
         throw new root.ParseError "group: '#{group}': name: invalud value '#{name}'" unless name.match re
@@ -57,7 +57,7 @@ class root.WeakSpec
     validate: (group, name, value) ->
         type = @spec[group]?[name]?.type
         throw new Error "no type for #{group}->#{name}" unless type
-        (new (@mapping type)(group, name, @spec[group][name]) ).validate(value)
+        (new (@_mapping type)(group, name, @spec[group][name]) ).validate(value)
 
     toHtml: ->
         (new drw.Drawer @spec).draw()

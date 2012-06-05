@@ -50,7 +50,7 @@ var weakspec = {
 			"desc" : "Option #1 in group #5",
 			"help" : "A help string for an options #1 in group 5",
 			"type" : "bool",
-			"default" : false
+			"default" : true
 		}
 	}
 }

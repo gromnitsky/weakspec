@@ -24,9 +24,7 @@ include(`style.css')
 		</label>
 	  </p>
 	  <p id="searchbox">
-		<label> Quick find:
-		  <input type="text">
-		</label>
+		  <input type="text" placeholder='Quick find'>
 	  </p>
 	</div>
 

@@ -1,11 +1,12 @@
 class EPref
+
     constructor: (@ws) ->
         @spec = ws.spec
-        # A hash with user's preferences.
+        # a hash with user's preferences
         @db = widget?.preferences || {}
 
         for group, prefs of @spec
-            @db[group] = {} if !@db[group]
+            @db[group] ||= {}
             for name, instr of prefs
                 if !@db[group][name]
                     @db[group][name] = instr.default
@@ -20,18 +21,50 @@ class EPref
         e = document.querySelectorAll '[class="pref"]'
         for idx in e
             [group, name, eClass] = uidParse idx
-            @setValue idx, @db[group][name]
+            @setElement idx, @db[group][name]
 
-    setValue: (element, value) ->
+    setElement: (element, value) ->
         [group, name, eClass] = uidParse element
         if !@ws.validate group, name, value
             console.error "set #{group}->#{name}: invalid value '#{value}'"
             return
-        console.log "set #{group}->#{name} to '#{value}'"
-        
+            
+        if (@_mapping @e2node(element).type)(element, 1, value)
+            console.log "set #{group}->#{name} to '#{value}'"
+
+    getElementValue: (element) ->
+        (@_mapping @e2node(element).type)(element)
+
+    # A signature for each method in the map:
+    #
+    #   foo(element, operation, value = null)
+    #
+    # where operation is a boolean: 0 for reading, 1 for setting a
+    # value. Returns the value if operation == 1 or null on error.
+    _mapping: (type) ->
+        {
+            'char*' : @pString,
+            'int' : @pInt,
+            'char**' : @pArrayOfString,
+            'int**' : @pArrayOfInt,
+            'bool' : @pBool
+        }[type] || throw new Error "no mapping method for type #{type}"
+
+    pString: (element, operation, value) ->
+        return element.value if !operation
+        if element then element.value = value else return false
+        true
+
+    pInt: (element, operation, value) =>
+        @pString element, operation, value
+
+    pBool: (element, operation, value) ->
+        return element.checked if !operation
+        if element then element.checked = value else return false
+        true
 
     # Transform uid to a hash with a particular preference node in @spec.
-    uid2dbNode: (element) ->
+    e2node: (element) ->
         [group, name, eClass] = uidParse element
         @spec[group][name]
         
@@ -57,7 +90,7 @@ mybind = (pref) ->
         idx.onclick = -> false
 
 bHelpCallback = (pref, element) ->
-    element.title = pref.uid2dbNode(element).help ? "Huh?"
+    element.title = pref.e2node(element).help ? "Huh?"
 
 
 # main

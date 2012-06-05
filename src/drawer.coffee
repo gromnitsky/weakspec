@@ -67,11 +67,14 @@ class root.Drawer
         "</tr>\n"
 
 
-    pString: (group, name, instr) ->
-        'string'
+    pString: (group, name, instr) =>
+        pattern = if instr.validationRegexp then "pattern='#{instr.validationRegexp}'" else ""
+        "<input class='pref' #{pattern} id='#{@uid(group, name, "char*")}'>\n"
 
-    pInteger: (group, name, instr) ->
-        'int'
+    pInteger: (group, name, instr) =>
+        min = if instr.range then "min='#{instr.range[0]}'" else ""
+        max = if instr.range then  "max='#{instr.range[1]}'" else ""
+        "<input class='pref' type='number' #{min} #{max} id='#{@uid(group, name, "int")}'>\n"
 
     pArrayOfString: (group, name, instr) ->
         'aos'
@@ -80,6 +83,5 @@ class root.Drawer
         'aoi'
 
     pBool: (group, name, instr) =>
-        checked = if instr.default then "checked='checked'" else ""
-        "<input class='pref' type='checkbox' #{checked} id='#{@uid(group, name, "bool")}' />\n"
+        "<input class='pref' type='checkbox' id='#{@uid(group, name, "bool")}'>\n"
         
