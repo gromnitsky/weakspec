@@ -24,6 +24,7 @@ include(`style.css')
 	<div id='controls'>
 	  <button type='button' id='reset'>Global Reset to Defaults</button>
 	  <button type='button' id='clean'>Delete All Preferences from Opera</button>
+	  <button type='button' id='dump'>Dump Values to the Console</button>
 	</div>
 
 	<div id='preferences'>

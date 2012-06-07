@@ -13,16 +13,16 @@ class root.Drawer
     draw: ->
         html = ''
         for group, opts of @spec
-            html += "<fieldset id='#{@uid(group, "", "group")}' class='cut'>\n" +
-            "<form name=#{group}>\n" + 
+            html += "<fieldset>\n" +
+            "<form id='#{@uid(group, "", "group")}'>\n" + 
             "<legend>#{group}</legend>\n" +
             "<table>\n"
             
             (html += @generatePref group, name, instr) for name, instr of opts
             
             html += "</table>\n<div>\n"+
-            "<input type='submit' value='Save' class='bSave' id='#{@uid(group, "", "bSave")}'>\n" +
-            "<button type='button' class='bReset' id='#{@uid(group, "", "bReset")}'>Reset</button>\n" +
+            "<input type='submit' value='Save'>\n" +
+            "<input type='reset'>\n" +
             "</div>\n" +
             "</form>\n" +
             "</fieldset>\n\n"
@@ -31,8 +31,6 @@ class root.Drawer
     uid: (group, name, type) ->
         switch type
             when 'group' then "#{group}|#{name}|group"
-            when 'bReset' then "#{group}|#{name}|bReset"
-            when 'bSave' then "#{group}|#{name}|bSave"
             when 'bHelp' then "#{group}|#{name}|bHelp"
             when 'bDefault' then "#{group}|#{name}|bDefault"
             
@@ -75,7 +73,7 @@ class root.Drawer
 
     pString: (group, name, instr) =>
         pattern = if instr.validationRegexp then "pattern='#{instr.validationRegexp}'" else ""
-        required = if instr.allowEmpty then 'required' else ''
+        required = if instr.allowEmpty then '' else 'required'
         "<input #{required} class='pref' #{pattern} id='#{@uid(group, name, "char*")}'>\n"
 
     pInteger: (group, name, instr) =>
@@ -90,5 +88,5 @@ class root.Drawer
         html += "</select>"
 
     pBool: (group, name, instr) =>
-        "<input required class='pref' type='checkbox' id='#{@uid(group, name, "bool")}'>\n"
+        "<input class='pref' type='checkbox' id='#{@uid(group, name, "bool")}'>\n"
         

@@ -50,6 +50,14 @@ class EPref
     getElementValue: (element) ->
         (@_mapping @e2spec(element).type)(element)
 
+    # Save current value of element into DB
+    # 
+    # element -- DOM node
+    saveElementValue: (element) ->
+        [group, name, eClass] = uidParse element
+        @db[group][name] = @getElementValue element
+        console.log "SAVED #{group}->#{name}"
+
     # A signature for each method in the map:
     #
     #   foo(element, operation, value = null)
@@ -131,7 +139,6 @@ class EPref
         gid = @ws.drw.uid2groupUid element.id
         document.querySelectorAll "[id='#{gid}'] [class='pref']"
 
-
 errx = (msg) ->
     insertHtml "<b>Error:</b> #{msg}"
     alert "Error: #{msg}"
@@ -150,7 +157,7 @@ mybind = (pref) ->
     e = document.querySelectorAll '[class="bHelp"]'
     for idx in e
         idx.addEventListener 'mouseover', ->
-            bHelpCallback(pref, this)
+            bHelpCallback pref, this
         , false
         idx.onclick = -> false
 
@@ -158,15 +165,33 @@ mybind = (pref) ->
     e = document.querySelectorAll '[class="bDefault"]'
     for idx in e
         idx.addEventListener 'click', ->
-            bDefaultCallback(pref, this)
+            bDefaultCallback pref, this
         , false
 
-    # reset buttons
-    e = document.querySelectorAll '[class="bReset"]'
+    # form submition & reset
+    e = document.querySelectorAll 'form'
     for idx in e
-        idx.addEventListener 'click', ->
-            bResetCallback(pref, this)
+        idx.addEventListener 'submit', (event) ->
+            bSubmitCallback pref, this, event
         , false
+        idx.addEventListener 'reset', (event) ->
+            bResetCallback pref, this, event
+        , false
+
+    # dump button
+    (document.querySelector "[id='dump']").addEventListener 'click', ->
+        console.log pref.db
+    , false
+
+    # reset button
+    (document.querySelector "[id='reset']").addEventListener 'click', ->
+        alert 'not implemented'
+    , false
+
+    # reset button
+    (document.querySelector "[id='clean']").addEventListener 'click', ->
+        alert 'not implemented'
+    , false
 
 bHelpCallback = (pref, anchor) ->
     anchor.title = pref.e2spec(anchor).help ? "Huh?"
@@ -174,9 +199,18 @@ bHelpCallback = (pref, anchor) ->
 bDefaultCallback = (pref, button) ->
     pref.setElement pref.control2e(button), pref.e2spec(button).default
 
-bResetCallback = (pref, button) ->
-    e = pref.e2groupElements button
+bSubmitCallback = (pref, form, event) ->
+    return unless form.checkValidity()
+
+    event.preventDefault()
+    e = pref.e2groupElements form
+    pref.saveElementValue idx for idx in e
+
+bResetCallback = (pref, form, event) ->
+    event.preventDefault()
+    e = pref.e2groupElements form
     pref.setElement idx, pref.e2db idx for idx in e
+
 
 # main
 window.onload = ->
