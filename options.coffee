@@ -35,12 +35,12 @@ class EPref
 
     # element -- DOM node
     setElement: (element, value) ->
-        [group, name, eClass] = uidParse element
-        if !@ws.validate group, name, value
-            console.error "set #{group}->#{name}: invalid value '#{value}'"
-            return false
-            
+        # we don't validate value because we rely on a html5 browser
+        # validation; it should be safe, because the spec cannot contain
+        # invalid values & initial validation of the DB is done in the
+        # constructor.
         if (@_mapping @e2spec(element).type)(element, 1, value)
+            [group, name, eClass] = uidParse element
             console.log "set #{group}->#{name} to '#{value}'"
             true
         else
@@ -191,7 +191,6 @@ window.onload = ->
         return
 
     insertHtml ws.toHtml()
-    document.querySelector('[id="searchbox"] input').focus()
     
     pref = new EPref ws
     mybind pref

@@ -15,19 +15,15 @@ include(`style.css')
 	</style>
   </head>
   <body>
-	<div>
-	  <p id="help">
+	<div id='menu'>
+	  <p>
 		<a href="options.help.html" target="_blank">Help</a>
 	  </p>
-	  <p id="showall">
-		<label>
-		  <input type="checkbox">
-		  Show all
-		</label>
-	  </p>
-	  <p id="searchbox">
-		  <input type="text" placeholder='Quick find'>
-	  </p>
+	</div>
+
+	<div id='controls'>
+	  <button type='button' id='reset'>Global Reset to Defaults</button>
+	  <button type='button' id='clean'>Delete All Preferences from Opera</button>
 	</div>
 
 	<div id='preferences'>

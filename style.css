@@ -1,20 +1,11 @@
-#searchbox {
-	float: left;
-}
-
-#showall {
-	float: right;
-}
-
 fieldset {
 	border: 1px solid #999;
-	margin: 0 0 8px 0;
+	margin: 20px 0 0 0;
 	padding: 0;
 	clear: both;
 	box-sizing: border-box;
 	width: 100%;
-	
-	position: relative;
+	border-radius: 6px;
 }
 
 fieldset div {
@@ -22,28 +13,22 @@ fieldset div {
 	padding: 5px 5px 4px 5px;
 	margin: 0 -1px -4px -1px;
 	border: 1px solid #999;
-	border-radius: 0 0 4px 4px;
 	border-top-color: rgba(0,0,0,0.1);
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
 }
 
 legend {
-	display: block;
 	box-sizing: border-box;
 	width: 100%;
 	padding: 0 10px 0 20px;
-	margin: 0 -1px;
 	font-weight: bold;
-	text-indent: -7px;
+	text-indent: -15px;
 	line-height: 1.7;
 	background: rgba(0,0,0,0.075) -o-linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0));
-	text-shadow: 0 1px 0 rgba(255,255,255,0.5);
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	-o-transition: 0.2s;
-}
-
-legend:hover {
-	box-shadow: 0 0 0 2px rgba(0,0,0,0.15);
+	border-bottom: 1px solid #ccc;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
 }
 
 table {
