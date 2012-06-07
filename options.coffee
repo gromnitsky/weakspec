@@ -45,28 +45,54 @@ class EPref
         {
             'char*' : @pString,
             'int' : @pInt,
-            'list' : @List,
+            'list' : @pList,
             'bool' : @pBool
-        }[type] || throw new Error "no mapping method for type #{type}"
+        }[type] || throw new Error "no mapping method for type '#{type}'"
 
     pString: (element, operation, value) ->
+        return null if !element
+        
         return element.value if !operation
-        if element then element.value = value else return false
+        element.value = value
         true
 
     pInt: (element, operation, value) =>
         @pString element, operation, value
 
+    pList: (element, operation, value) =>
+        return null if !element
+        
+        if !operation # get
+            return element.value if element.type == 'select-one'
+            return (idx.value for idx in element.selectedOptions)
+        else # set
+            if element.type == 'select-one'
+                element.value = value
+                return true
+
+            # clean all selection
+            element.selectedIndex = -1
+            # make new
+            idx.selected = true for idx in element.options when idx.text in value
+            true
+
     pBool: (element, operation, value) ->
+        return null if !element
+        
         return element.checked if !operation
-        if element then element.checked = value else return false
+        element.checked = value
         true
 
     # Transform uid to a hash with a particular preference node in @spec.
     e2node: (element) ->
         [group, name, eClass] = uidParse element
         @spec[group][name]
-        
+
+    control2e: (element) ->
+        type = @e2node(element).type
+        [group, name, eClass] = uidParse element
+        uid =  @ws.drw.uid(group, name, type)
+        document.querySelector "[id='#{uid}']"
 
 errx = (msg) ->
     insertHtml "<b>Error:</b> #{msg}"
@@ -88,9 +114,18 @@ mybind = (pref) ->
         , false
         idx.onclick = -> false
 
-bHelpCallback = (pref, element) ->
-    element.title = pref.e2node(element).help ? "Huh?"
+    # default buttons
+    e = document.querySelectorAll '[class="bDefault"]'
+    for idx in e
+        idx.addEventListener 'click', ->
+            bDefaultCallback(pref, this)
+        , false
 
+bHelpCallback = (pref, anchor) ->
+    anchor.title = pref.e2node(anchor).help ? "Huh?"
+
+bDefaultCallback = (pref, button) ->
+    pref.setElement pref.control2e(button), pref.e2node(button).default
 
 # main
 window.onload = ->

@@ -26,6 +26,7 @@ class root.WeakSpec
         throw new root.ParseError('the spec must contain at least 1 group') if @size() < 1
         for group, opts of @spec
             @validateSpecPref group, name for name of opts
+        @drw = new drw.Drawer @spec
 
     size: ->
         n = 0
@@ -58,7 +59,7 @@ class root.WeakSpec
         (new (@_mapping type)(group, name, @spec[group][name]) ).validate(value)
 
     toHtml: ->
-        (new drw.Drawer @spec).draw()
+        @drw.draw()
 
 # Interface to data validation from a specfile.
 class Pref

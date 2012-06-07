@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang='en'>
   <head>
+    <title>Weakspec</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<script src='options.weakspec.js'></script>
 	
 	<script>

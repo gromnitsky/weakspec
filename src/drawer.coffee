@@ -64,7 +64,6 @@ class root.Drawer
         "</td>\n" +
         "</tr>\n"
 
-
     pString: (group, name, instr) =>
         pattern = if instr.validationRegexp then "pattern='#{instr.validationRegexp}'" else ""
         "<input class='pref' #{pattern} id='#{@uid(group, name, "char*")}'>\n"
@@ -74,8 +73,11 @@ class root.Drawer
         max = if instr.range then  "max='#{instr.range[1]}'" else ""
         "<input class='pref' type='number' #{min} #{max} id='#{@uid(group, name, "int")}'>\n"
 
-    pList: (group, name, instr) ->
-        'list'
+    pList: (group, name, instr) =>
+        multiple = if instr.selectedSize[0] == 1 && instr.selectedSize[1] == 1 then "" else "multiple"
+        html = "<select class='pref' #{multiple} required id='#{@uid(group, name, "list")}'>"
+        html += "<option value='#{idx}'>#{idx}</option>" for idx in instr.data
+        html += "</select>"
 
     pBool: (group, name, instr) =>
         "<input class='pref' type='checkbox' id='#{@uid(group, name, "bool")}'>\n"

@@ -22,7 +22,7 @@ var weakspec = {
 		"opt1" : {
 			"desc" : "Option #1 in group #3",
 			"type" : "list",
-			"default" : ["one", "two"],
+			"default" : ["one", "three"],
 			"selectedSize" : [1, 2],
 			"validationCallback" : null,
 			"data" : ["one", "two", "three", "four"]
