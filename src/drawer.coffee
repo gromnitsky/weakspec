@@ -41,6 +41,13 @@ class root.Drawer
             else
                 new Error "invalid uid type '#{type}'"
 
+    uid2groupUid: (uid) ->
+        return null unless uid
+        [group, name, eClass] = uid.trim().split '|'
+        return null unless group
+
+        @uid group, name ||= '', 'group'
+
     generatePref: (group, name, instr) ->
         throw new Error "no type" unless instr.type
 
