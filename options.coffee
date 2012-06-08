@@ -14,21 +14,20 @@ class EPref
     # ws -- WeakSpec object
     constructor: (@ws) ->
         @spec = ws.spec
-        # DB
-        @db = widget?.preferences || {}
+        # Opera DB
+        @storage = new ExtStorage()
 
         for group, prefs of @spec
-            @db[group] ||= {}
             for name, instr of prefs
-                if !@db[group][name]
-                    @db[group][name] = instr.default
+                if !(@storage.get group, name)
+                    @storage.set group, name, instr.default
                 else
                     # if DB contains invalid value (not conforming to
                     # @spec), delete it and use the default from the @spec.
-                    if !@ws.validate group, name, @db[group][name]
-                        console.warn "#{group}->#{name}: invalid value '#{@db[group][name]}'; reverting to default"
-                        @db[group][name] = instr.default
-
+                    if !@ws.validate group, name, @storage.get(group, name)
+                        console.warn "#{group}->#{name}: invalid value '#{@storage.get(group, name)}'; reverting to default"
+                        @storage.set group, name, instr.default
+    
         # update DOM to current preferences values
         e = document.querySelectorAll '[class="pref"]'
         @setElement idx, @e2db idx for idx in e
@@ -55,7 +54,7 @@ class EPref
     # element -- DOM node
     saveElementValue: (element) ->
         [group, name, eClass] = uidParse element
-        @db[group][name] = @getElementValue element
+        @storage.set group, name, @getElementValue(element)
         console.log "SAVED #{group}->#{name}"
 
     # A signature for each method in the map:
@@ -121,7 +120,7 @@ class EPref
     # element -- DOM node
     e2db: (element) ->
         [group, name, eClass] = uidParse element
-        @db[group][name]
+        @storage.get group, name
 
     # Return a PE to which the CE corresponds to.
     #
@@ -180,17 +179,30 @@ mybind = (pref) ->
 
     # dump button
     (document.querySelector "[id='dump']").addEventListener 'click', ->
-        console.log pref.db
+        console.log pref.storage.raw()
     , false
 
     # reset button
     (document.querySelector "[id='reset']").addEventListener 'click', ->
-        alert 'not implemented'
+        return unless confirm "Are you sure?"
+
+        e = document.querySelectorAll "form"
+        idx.reset() for idx in e
     , false
 
-    # reset button
+    # clean button
     (document.querySelector "[id='clean']").addEventListener 'click', ->
-        alert 'not implemented'
+        return unless confirm "This will delete all preferences for this " +
+        "extension from Opera. After that it'll be the same as if you have " +
+        "installed this extension for the first time.\n\n" +
+        "Are you sure?"
+
+        pref.storage.clean()
+        
+        document.querySelector('[id="menu"]').hidden = true
+        document.querySelector('[id="controls"]').hidden = true
+        insertHtml "You've deleted any preferences for this extension.<br/>
+        <b>Please close this window.</b>"
     , false
 
 bHelpCallback = (pref, anchor) ->
