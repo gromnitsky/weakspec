@@ -87,7 +87,10 @@ class EPref
         
         if !operation # get
             return element.value if element.type == 'select-one'
-            return (idx.value for idx in element.selectedOptions)
+            # Return an array of selected options for HTML select. We
+            # are not using 'new' selectedOptions() due to its brain
+            # dead behaviour in 11.64.
+            (idx.value for idx in element.options when idx.selected)
         else # set
             if element.type == 'select-one'
                 element.value = value
@@ -177,9 +180,12 @@ mybind = (pref) ->
             bResetCallback pref, this, event
         , false
 
-    # dump button
-    (document.querySelector "[id='dump']").addEventListener 'click', ->
-        console.log pref.storage.raw()
+    # save button
+    (document.querySelector "[id='save']").addEventListener 'click', ->
+        return unless confirm "Are you sure?"
+
+        e = document.querySelectorAll "form input[type='submit']"
+        idx.click() for idx in e
     , false
 
     # reset button
@@ -205,6 +211,11 @@ mybind = (pref) ->
         <b>Please close this window.</b>"
     , false
 
+    # dump button
+    (document.querySelector "[id='dump']").addEventListener 'click', ->
+        console.log pref.storage.raw()
+    , false
+
 bHelpCallback = (pref, anchor) ->
     anchor.title = pref.e2spec(anchor).help ? "Huh?"
 
@@ -214,11 +225,13 @@ bDefaultCallback = (pref, button) ->
 bSubmitCallback = (pref, form, event) ->
     return unless form.checkValidity()
 
-    event.preventDefault()
+    console.log 'SUBMIT'
+    event?.preventDefault()
     e = pref.e2groupElements form
     pref.saveElementValue idx for idx in e
 
 bResetCallback = (pref, form, event) ->
+    console.log 'RESET'
     event.preventDefault()
     e = pref.e2groupElements form
     pref.setElement idx, pref.e2db idx for idx in e
