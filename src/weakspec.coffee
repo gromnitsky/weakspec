@@ -29,9 +29,7 @@ class root.WeakSpec
         @drw = new drw.Drawer @spec
 
     size: ->
-        n = 0
-        n++ for k of @spec
-        n
+        (Object.keys @spec).length
 
     validateSpecPref: (group, name) ->
         instr = @spec[group][name]
@@ -42,11 +40,11 @@ class root.WeakSpec
 
     _mapping: (type) ->
         {
-            'char*' : root.PrefStr,
+            'string' : root.PrefStr,
             'int' : root.PrefInt,
             'list' : root.PrefList,
             'bool' : root.PrefBool
-        }[type] || throw new root.PrefError group, "no method for '#{instr.type}' type"
+        }[type] || throw new root.ParseError "no method for '#{type}' type"
 
     _validateUid: (group, name) ->
         re = /^[A-Za-z0-9_,. -]+$/

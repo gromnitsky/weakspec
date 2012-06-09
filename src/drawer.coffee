@@ -6,10 +6,8 @@ class root.Drawer
         throw new Error 'no valid spec' unless @spec && @size() > 1
             
     size: ->
-        n = 0
-        n++ for k of @spec
-        n
-        
+        (Object.keys @spec).length
+                    
     draw: ->
         html = ''
         for group, opts of @spec
@@ -34,7 +32,7 @@ class root.Drawer
             when 'bHelp' then "#{group}|#{name}|bHelp"
             when 'bDefault' then "#{group}|#{name}|bDefault"
             
-            when 'char*' then "#{group}|#{name}|pString"
+            when 'string' then "#{group}|#{name}|pString"
             when 'int' then "#{group}|#{name}|pInt"
             when 'list' then "#{group}|#{name}|pList"
             when 'bool' then "#{group}|#{name}|pBool"
@@ -52,7 +50,7 @@ class root.Drawer
         throw new Error "no type" unless instr.type
 
         mapping = {
-            'char*' : @pString,
+            'string' : @pString,
             'int' : @pInteger,
             'list' : @pList,
             'bool' : @pBool
@@ -74,7 +72,7 @@ class root.Drawer
     pString: (group, name, instr) =>
         pattern = if instr.validationRegexp then "pattern='#{instr.validationRegexp}'" else ""
         required = if instr.allowEmpty then '' else 'required'
-        "<input #{required} class='pref' #{pattern} id='#{@uid(group, name, "char*")}'>\n"
+        "<input #{required} class='pref' #{pattern} id='#{@uid(group, name, "string")}'>\n"
 
     pInteger: (group, name, instr) =>
         min = if instr.range then "min='#{instr.range[0]}'" else ""

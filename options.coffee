@@ -66,7 +66,7 @@ class EPref
     # 1 or null on error.
     _mapping: (type) ->
         {
-            'char*' : @peStringCallback,
+            'string' : @peStringCallback,
             'int' : @peIntCallback,
             'list' : @peListCallback,
             'bool' : @peBoolCallback

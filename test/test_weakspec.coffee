@@ -70,12 +70,12 @@ suite 'WeakSpec', ->
         html = @ws01.toHtml()
         assert.ok html.length > 10
 
-    test 'spec char* validation ok', ->
+    test 'spec string validation ok', ->
         @min_string.default = "qwe"
         check_val ws.PrefStr, ['allowEmpty'], false, @min_string
         check_val ws.PrefStr, ['validationRegexp'], 'q', @min_string
 
-    test 'spec char* validation fail', ->
+    test 'spec string validation fail', ->
         assert.throws ->
             (new ws.PrefStr 'foo', 'bar', {'default' : 'zzz'}).validateSpec()
         , /missing 'desc'/
@@ -169,7 +169,7 @@ suite 'WeakSpec', ->
     test 'spec bool validation fail', ->
         check_bogusVal ws.PrefBool, ['default'], 'whoa', @min_bool
 
-    test 'char* validation', ->
+    test 'string validation', ->
         assert !@ws01.validate('Group 1', 'opt1', null)
         assert !@ws01.validate('Group 1', 'opt1', 'zzz')
         assert @ws01.validate('Group 1', 'opt1', 'zz')

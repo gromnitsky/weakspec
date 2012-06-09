@@ -3,7 +3,7 @@ var weakspec = {
 		"opt1" : {
 			"desc" : "Option #1 in group #1",
 			"help" : "A help string for an options #1 in group 1",
-			"type" : "char*",
+			"type" : "string",
 			"default" : "ua",
 			"validationRegexp" : "^[a-z]{2}$",
 			"validationCallback" : null,
