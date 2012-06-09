@@ -71,24 +71,54 @@ class Pref
             ,
             'type' : null
         }
-        @local = {
-            'help' : null,
-            'validationCallback' : null,
-            'default' : null
-        }
+        @local = [
+            { 'help' : null },
+            { 'validationCallback' : null }
+        ]
+
+    _localFind: (opt) ->
+        for idx in @local
+            cb = (Object.keys idx)[0]
+            return idx[cb] if cb == opt
+        undefined
 
     validateSpec: ->
+        if @instr['default'] in [null, undefined]
+            throw new root.PrefError @group, @name, "'default' cannot be null or missing"
+                        
+        # check for required for all
         for k of @req
             throw new root.PrefError @group, @name, "missing '#{k}'" if @instr[k] == undefined
             throw new root.PrefError @group, @name, "invalid value in '#{k}'" if @req[k] && !@req[k](@instr[k])
 
+        # check for unknown
         for k of @instr when @req[k] == undefined
-            throw new root.PrefError @group, @name, "'#{k}' is unknown" if @local[k] == undefined
-            throw new root.PrefError @group, @name, "invalid value in '#{k}'" if @local[k] && @instr[k] != null && !@local[k](@instr[k])
+            callback = @_localFind k
+            throw new root.PrefError @group, @name, "'#{k}' is unknown" if callback == undefined
+
+        # check for required locals
+        for idx in @local
+            option = (Object.keys idx)[0]
+            callback = idx[option]
+
+            if @instr[option] == undefined && callback != null
+                throw new root.PrefError @group, @name, "'#{option}' is required (set if to null if you don't care)"
+            
+            if callback && @instr[option] != null && !callback(@instr[option])
+                throw new root.PrefError @group, @name, "invalid value in '#{option}'"
+
 
     isStr: (t) ->
         return false if typeof t != 'string'
         !t.match /^\s*$/
+
+    isRegexp: (t) ->
+        return false if typeof t != 'string'
+        try
+            new RegExp t
+        catch error
+            return false
+        true
 
     isBoolean: (t) ->
         typeof t == 'boolean'
@@ -110,64 +140,75 @@ class Pref
 
     validate: (value) ->
         return @instr.validationCallback(value) if @instr.validationCallback
-        @local['default'](value)
+        @_localFind('default')(value)
         
 
 class root.PrefStr extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
 
-        @local['validationRegexp'] = (val) =>
-            this.isStr(val)
+        @local.push { 'validationRegexp' : (val) =>
+            this.isRegexp(val)
+        }
     
-        @local['allowEmpty'] = (val) =>
+        @local.push { 'allowEmpty' : (val) =>
             this.isBoolean val
+        }
 
-        @local['default'] = (val) =>
+        # add 'default' check
+        @local.push { 'default' : (val) =>
             return false if typeof val != 'string'
             return false if val == '' && !@instr.allowEmpty
             (return false unless val.match @instr.validationRegexp) if @instr.validationRegexp
             true
-        
+        }
 
 class root.PrefInt extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
             
-        @local['range'] = (val) =>
+        @local.push { 'range' : (val) =>
             this.isRange val
+        }
 
-        @local['default'] = (val) =>
+        @local.push { 'default' : (val) =>
             return false if typeof val != 'number'
             return false unless this.inRange(@instr.range, val)
             true
+        }
 
 class root.PrefList extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
-        @local['data'] = (val) =>
+        
+        @local.push { 'data' : (val) =>
             return false unless @isArray val
             true
+        }
 
-        @local['selectedSize'] = (val) =>
+        @local.push { 'selectedSize' : (val) =>
             return false unless @isArray val
             return false unless @isRange @instr.selectedSize
             return false unless val[0] <= @instr.data.length && \
                 val[1] <= @instr.data.length && \
                 val[0] > 0 && val[1] > 0
             true
+        }
 
-        @local['default'] = (val) =>
+        @local.push { 'default' : (val) =>
             return false unless @isArray(val) && val.length
             return false unless @isArray @instr.data
             (return false unless idx in @instr.data) for idx in val
             return false unless val.length <= @instr.selectedSize[1]
             true
+        }
 
 
 class root.PrefBool extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
 
-        @local['default'] = (val) =>
+        @local.push { 'default' : (val) =>
             this.isBoolean val
+        }
+        

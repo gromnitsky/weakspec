@@ -35,12 +35,15 @@ suite 'WeakSpec', ->
         @min_string = {
             "type" : null,
             "desc" : "z",
-            "default" : ""
+            "default" : "",
+            "allowEmpty" : true
+            "validationRegexp" : null
         }
         @min_int = {
             "type" : null,
             "desc" : "zz",
-            "default" : 42
+            "default" : 42,
+            "range" : null
         }
         @min_list_multi = {
             "type" : null,
@@ -52,8 +55,8 @@ suite 'WeakSpec', ->
         @min_list_single = {
             "type" : null,
             "desc" : "zzz",
-            "default" : ['w']
             "data" : ['q', 'w', 'e']
+            "default" : ['w']
             "selectedSize" : [1, 1]
         }
         @min_bool = {
@@ -68,23 +71,46 @@ suite 'WeakSpec', ->
         assert.ok html.length > 10
 
     test 'spec char* validation ok', ->
-        check_val ws.PrefStr, ['allowEmpty'], true, @min_string
-        
+        @min_string.default = "qwe"
+        check_val ws.PrefStr, ['allowEmpty'], false, @min_string
+        check_val ws.PrefStr, ['validationRegexp'], 'q', @min_string
+
     test 'spec char* validation fail', ->
         assert.throws ->
-            (new ws.PrefStr 'foo', 'bar', {}).validateSpec()
+            (new ws.PrefStr 'foo', 'bar', {'default' : 'zzz'}).validateSpec()
         , /missing 'desc'/
         
+        @min_string.default = "qwe"
         check_bogusVal ws.PrefStr, ['default'], [], @min_string
         check_bogusVal ws.PrefStr, ['validationRegexp'], 1, @min_string
+        check_bogusVal ws.PrefStr, ['validationRegexp'], '[', @min_string
         check_bogusVal ws.PrefStr, ['allowEmpty'], undefined, @min_string
 
-        @min_string.default = "qwe"
         @min_string.ooops = 1
         assert.throws =>
             (new ws.PrefStr 'foo', 'bar', @min_string).validateSpec()
         , /'ooops' is unknown/
         delete @min_string.ooops
+
+        check_bogusVal ws.PrefStr, ['validationRegexp'], '', {
+            "type" : null,
+            "desc" : "z",
+            "default" : null,
+            "allowEmpty" : true
+        }
+
+        check_bogusVal ws.PrefStr, ['validationRegexp'], '', {
+            "type" : null,
+            "desc" : "z",
+            "allowEmpty" : true
+        }
+
+        check_bogusVal ws.PrefStr, ['validationRegexp'], '', {
+            "type" : null,
+            "desc" : "z",
+            "default" : undefined,
+            "allowEmpty" : true
+        }
 
     test 'spec int validaion ok', ->
         assert.doesNotThrow =>
