@@ -33,7 +33,7 @@ class root.Drawer
             when 'bDefault' then "#{group}|#{name}|bDefault"
             
             when 'string' then "#{group}|#{name}|pString"
-            when 'int' then "#{group}|#{name}|pInt"
+            when 'number' then "#{group}|#{name}|pNumber"
             when 'list' then "#{group}|#{name}|pList"
             when 'bool' then "#{group}|#{name}|pBool"
             else
@@ -51,7 +51,7 @@ class root.Drawer
 
         mapping = {
             'string' : @pString,
-            'int' : @pInteger,
+            'number' : @pNumber,
             'list' : @pList,
             'bool' : @pBool
         }
@@ -74,10 +74,10 @@ class root.Drawer
         required = if instr.allowEmpty then '' else 'required'
         "<input #{required} class='pref' #{pattern} id='#{@uid(group, name, "string")}'>\n"
 
-    pInteger: (group, name, instr) =>
+    pNumber: (group, name, instr) =>
         min = if instr.range then "min='#{instr.range[0]}'" else ""
         max = if instr.range then  "max='#{instr.range[1]}'" else ""
-        "<input required class='pref' type='number' #{min} #{max} id='#{@uid(group, name, "int")}'>\n"
+        "<input required class='pref' type='number' #{min} #{max} id='#{@uid(group, name, "number")}'>\n"
 
     pList: (group, name, instr) =>
         multiple = if instr.selectedSize[0] == 1 && instr.selectedSize[1] == 1 then "" else "multiple"

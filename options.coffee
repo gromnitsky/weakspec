@@ -49,7 +49,7 @@ class EPref
     getElementValue: (element) ->
         (@_mapping @e2spec(element).type)(element)
 
-    # Save current value of element into DB
+    # Save current value of the element to DB
     # 
     # element -- DOM node
     saveElementValue: (element) ->
@@ -67,7 +67,7 @@ class EPref
     _mapping: (type) ->
         {
             'string' : @peStringCallback,
-            'int' : @peIntCallback,
+            'number' : @peNumberCallback,
             'list' : @peListCallback,
             'bool' : @peBoolCallback
         }[type] || throw new Error "no mapping method for type '#{type}'"
@@ -79,7 +79,7 @@ class EPref
         element.value = value
         true
 
-    peIntCallback: (element, operation, value) =>
+    peNumberCallback: (element, operation, value) =>
         @peStringCallback element, operation, value
 
     peListCallback: (element, operation, value) =>

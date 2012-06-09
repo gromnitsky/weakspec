@@ -41,7 +41,7 @@ class root.WeakSpec
     _mapping: (type) ->
         {
             'string' : root.PrefStr,
-            'int' : root.PrefInt,
+            'number' : root.PrefNumber,
             'list' : root.PrefList,
             'bool' : root.PrefBool
         }[type] || throw new root.ParseError "no method for '#{type}' type"
@@ -161,7 +161,7 @@ class root.PrefStr extends Pref
             true
         }
 
-class root.PrefInt extends Pref
+class root.PrefNumber extends Pref
     constructor: (@group, @name, @instr) ->
         super @group, @name, @instr
             

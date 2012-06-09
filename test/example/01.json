@@ -12,7 +12,7 @@ var weakspec = {
 		"opt2" : {
 			"desc" : "Option #2 in group #1",
 			"help" : "A help string for an options #2 in group 1",
-			"type" : "int",
+			"type" : "number",
 			"default" : 42,
 			"validationCallback" : null,
 			"range" : [0, 127]

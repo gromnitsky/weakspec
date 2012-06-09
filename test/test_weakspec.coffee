@@ -39,7 +39,7 @@ suite 'WeakSpec', ->
             "allowEmpty" : true
             "validationRegexp" : null
         }
-        @min_int = {
+        @min_number = {
             "type" : null,
             "desc" : "zz",
             "default" : 42,
@@ -112,19 +112,19 @@ suite 'WeakSpec', ->
             "allowEmpty" : true
         }
 
-    test 'spec int validaion ok', ->
+    test 'spec number validaion ok', ->
         assert.doesNotThrow =>
-            (new ws.PrefInt 'foo', 'bar', @min_int).validateSpec()
+            (new ws.PrefNumber 'foo', 'bar', @min_number).validateSpec()
 
-        check_val ws.PrefInt, ['range'], [10, 100], @min_int
+        check_val ws.PrefNumber, ['range'], [10, 100], @min_number
 
-    test 'spec int validation fail', ->
-        check_bogusVal ws.PrefInt, ['default'], '', @min_int
-        check_bogusVal ws.PrefInt, ['range'], 'whoa', @min_int
-        check_bogusVal ws.PrefInt, ['range'], [null], @min_int
-        check_bogusVal ws.PrefInt, ['range'], [0], @min_int
-        check_bogusVal ws.PrefInt, ['range'], [0, 1, 2], @min_int
-        check_bogusVal ws.PrefInt, ['range'], [0, -1], @min_int
+    test 'spec number validation fail', ->
+        check_bogusVal ws.PrefNumber, ['default'], '', @min_number
+        check_bogusVal ws.PrefNumber, ['range'], 'whoa', @min_number
+        check_bogusVal ws.PrefNumber, ['range'], [null], @min_number
+        check_bogusVal ws.PrefNumber, ['range'], [0], @min_number
+        check_bogusVal ws.PrefNumber, ['range'], [0, 1, 2], @min_number
+        check_bogusVal ws.PrefNumber, ['range'], [0, -1], @min_number
 
     test 'spec list validation ok', ->
         assert.doesNotThrow =>
@@ -180,7 +180,7 @@ suite 'WeakSpec', ->
         @spec01['Group 1']['opt1'].allowEmpty = true
         assert @ws01.validate('Group 1', 'opt1', '')
 
-    test 'int validation', ->
+    test 'number validation', ->
         assert !@ws01.validate('Group 1', 'opt2', 'whoa')
         assert !@ws01.validate('Group 1', 'opt2', [])
         assert !@ws01.validate('Group 1', 'opt2', 199)
