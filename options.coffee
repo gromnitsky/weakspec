@@ -192,8 +192,8 @@ mybind = (pref) ->
     (document.querySelector "[id='reset']").addEventListener 'click', ->
         return unless confirm "Are you sure?"
 
-        e = document.querySelectorAll "form"
-        idx.reset() for idx in e
+        e = document.querySelectorAll '[class="bDefault"]'
+        idx.click() for idx in e
     , false
 
     # clean button
