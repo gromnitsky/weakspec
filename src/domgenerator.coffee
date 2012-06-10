@@ -2,25 +2,28 @@ root = exports ? this
 
 class root.DomGenerator
 
-    constructor: ->
-        @nodes = []
+    constructor: (@parent) ->
 
-    n: (name, attr, child) ->
-        html = "<#{name} #{attr}>"
-        @nodes.push html
-        child.call(this, this) if child
-        @nodes.push "</#{name}>"
-        
+    n: (name, attr, parent, childCallback) ->
+        node = document.createElement name
+        node.setAttribute(k, v) for k,v of attr
+
+        p = if parent then parent else @parent
+        p.appendChild node
+        @parent = node
+
+        if childCallback
+            childCallback.call this
+            @parent = node
+    
         this
 
-    t: (text, child) ->
-        html = text
-        @nodes.push html
-        child.call(this, this) if child
+    t: (text, parent, siblingCallback) ->
+        node = document.createTextNode text
+        p = if parent then parent else @parent
+        p.appendChild node
+        # no parent nodes possible
 
+        siblingCallback.call this if siblingCallback
         this
 
-    toString: ->
-        s = ''
-        s += idx for idx in @nodes
-        s
