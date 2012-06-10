@@ -1,37 +1,44 @@
 root = exports ? this
 
+dg = require?('./domgenerator') || root
+
 class root.Drawer
     # spec must be validated with Pref* by WeakSpec
     constructor: (@spec) ->
         throw new Error 'no valid spec' unless @spec && @size() > 1
-            
+        @DG = dg.DomGenerator
+
     size: ->
         (Object.keys @spec).length
-                    
-    draw: ->
-        html = ''
+
+    tree: ->
+        nodes = []
         for group, opts of @spec
-            html += "<fieldset>\n" +
-            "<form id='#{@uid(group, "", "group")}'>\n" + 
-            "<legend>#{group}</legend>\n" +
-            "<table>\n"
-            
-            (html += @generatePref group, name, instr) for name, instr of opts
-            
-            html += "</table>\n<div>\n"+
-            "<input type='submit' value='Save'>\n" +
-            "<input type='reset'>\n" +
-            "</div>\n" +
-            "</form>\n" +
-            "</fieldset>\n\n"
-        html
+            o = this
+
+            grp = @DG.n null, 'fieldset'
+            form = @DG.n grp, 'form', { 'id' : o.uid(group, '', 'group') }, ->
+                @d.n this, 'legend', null, ->
+                    # caption
+                    @d.t this, group
+                    
+                @d.n this, 'table', null, ->
+                    o.generatePref this, group, name, instr for name, instr of opts
+
+                @d.n this, 'div', null, ->
+                    @d.n this, 'input', { 'type' : 'submit', 'value' : 'save' }
+                    @d.t this, ' '
+                    @d.n this, 'input', { 'type' : 'reset' }
+
+            nodes.push grp.node
+        nodes
 
     uid: (group, name, type) ->
         switch type
             when 'group' then "#{group}|#{name}|group"
             when 'bHelp' then "#{group}|#{name}|bHelp"
             when 'bDefault' then "#{group}|#{name}|bDefault"
-            
+
             when 'string' then "#{group}|#{name}|pString"
             when 'number' then "#{group}|#{name}|pNumber"
             when 'list' then "#{group}|#{name}|pList"
@@ -46,7 +53,7 @@ class root.Drawer
 
         @uid group, name ||= '', 'group'
 
-    generatePref: (group, name, instr) ->
+    generatePref: (parentDomGen, group, name, instr) ->
         throw new Error "no type" unless instr.type
 
         mapping = {
@@ -57,34 +64,56 @@ class root.Drawer
         }
 
         throw new Error "invalid type '#{instr.type}'" unless mapping[instr.type]
-
-        html = "<tr>\n" +
-        "<th>#{instr.desc}</th>\n" +
-        "<td>\n"
-        html += mapping[instr.type](group, name, instr)
-        html += "</td>\n" +
-        "<td>\n" +
-        "<button type='button' class='bDefault' id='#{@uid(group, name, "bDefault")}'>Default</button>\n" +
-        "<a class='bHelp' href='#' id='#{@uid(group, name, "bHelp")}'>?</a>\n" +
-        "</td>\n" +
-        "</tr>\n"
-
-    pString: (group, name, instr) =>
-        pattern = if instr.validationRegexp then "pattern='#{instr.validationRegexp}'" else ""
-        required = if instr.allowEmpty then '' else 'required'
-        "<input #{required} class='pref' #{pattern} id='#{@uid(group, name, "string")}'>\n"
-
-    pNumber: (group, name, instr) =>
-        min = if instr.range then "min='#{instr.range[0]}'" else ""
-        max = if instr.range then  "max='#{instr.range[1]}'" else ""
-        "<input required class='pref' type='number' #{min} #{max} id='#{@uid(group, name, "number")}'>\n"
-
-    pList: (group, name, instr) =>
-        multiple = if instr.selectedSize[0] == 1 && instr.selectedSize[1] == 1 then "" else "multiple"
-        html = "<select required class='pref' #{multiple} id='#{@uid(group, name, "list")}'>"
-        html += "<option value='#{idx}'>#{idx}</option>" for idx in instr.data
-        html += "</select>"
-
-    pBool: (group, name, instr) =>
-        "<input class='pref' type='checkbox' id='#{@uid(group, name, "bool")}'>\n"
+        o = this
         
+        @DG.n parentDomGen, 'tr', null, ->
+            @d.n this, 'th', null, ->
+                @d.t this, instr.desc
+            @d.n this, 'td', null, ->
+                mapping[instr.type](this, group, name, instr)
+            @d.n this, 'td', null, ->
+                @d.n this, 'button', { 'type' : 'button', "class" : "bDefault", "id" : o.uid(group, name, "bDefault") }, ->
+                    @d.t this, 'Default'
+                @d.t this, ' '
+                @d.n this, 'a', { "href" : "#", "class" : "bHelp", "id" : o.uid(group, name, "bHelp") }, ->
+                    @d.t this, "?"
+
+    pString: (parentDomGen, group, name, instr) =>
+        attr = {
+            "class" : "pref",
+            "id" : @uid(group, name, "string")
+        }
+        attr['pattern'] = instr.validationRegexp if instr.validationRegexp
+        attr['required'] = "" if !instr.allowEmpty
+        @DG.n parentDomGen, 'input', attr
+
+    pNumber: (parentDomGen, group, name, instr) =>
+        attr = {
+            "class" : "pref",
+            "id" : @uid(group, name, "number"),
+            "required" : "",
+            "type" : "number"
+        }
+        attr['min'] = instr.range[0] if instr.range
+        attr['max'] = instr.range[1] if instr.range
+        @DG.n parentDomGen, 'input', attr
+
+    pList: (parentDomGen, group, name, instr) =>
+        attr = {
+            "class" : "pref",
+            "id" : @uid(group, name, "list"),
+            "required" : ""
+        }
+        attr["multiple"] = "multiple" if !(instr.selectedSize[0] == 1 && instr.selectedSize[1] == 1)
+        @DG.n parentDomGen, 'select', attr, ->
+            for idx in instr.data
+                @d.n this, 'option', { 'value' : idx }, ->
+                    @d.t this, idx
+
+    pBool: (parentDomGen, group, name, instr) =>
+        attr = {
+            "class" : "pref",
+            "id" : @uid(group, name, "bool"),
+            "type" : "checkbox"
+        }
+        @DG.n parentDomGen, 'input', attr

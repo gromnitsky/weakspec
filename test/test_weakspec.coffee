@@ -67,8 +67,6 @@ suite 'WeakSpec', ->
 
     test 'smoke test', ->
         assert.equal 4, @ws01.size()
-        html = @ws01.toHtml()
-        assert.ok html.length > 10
 
     test 'spec string validation ok', ->
         @min_string.default = "qwe"

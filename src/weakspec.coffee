@@ -56,8 +56,8 @@ class root.WeakSpec
         throw new Error "no type for #{group}->#{name}" unless type
         (new (@_mapping type)(group, name, @spec[group][name]) ).validate(value)
 
-    toHtml: ->
-        @drw.draw()
+    toDomElements: ->
+        @drw.tree()
 
 # Interface to data validation from a specfile.
 class Pref

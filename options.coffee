@@ -146,8 +146,11 @@ errx = (msg) ->
     alert "Error: #{msg}"
 
 insertHtml = (html) ->
-    document.querySelector('div[id="preferences"]').innerHTML = html
+    innerPoint().innerHTML = html
 
+innerPoint = ->
+    document.querySelector('div[id="preferences"]')
+    
 # element -- DOM node
 uidParse = (element) ->
     throw new Error "no uid on #{element.tagName}" unless uid = element.id
@@ -220,6 +223,7 @@ bHelpCallback = (pref, anchor) ->
     anchor.title = pref.e2spec(anchor).help ? "Huh?"
 
 bDefaultCallback = (pref, button) ->
+    console.log 'DEFAULT'
     pref.setElement pref.control2e(button), pref.e2spec(button).default
 
 bSubmitCallback = (pref, form, event) ->
@@ -249,7 +253,8 @@ window.onload = ->
         errx "in spec: #{e.message}"
         return
 
-    insertHtml ws.toHtml()
+    insertHtml ''
+    innerPoint().appendChild idx for idx in ws.toDomElements()
     
     pref = new EPref ws
     mybind pref

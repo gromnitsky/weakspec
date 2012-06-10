@@ -13,10 +13,6 @@ suite 'Drawer', ->
         
         @drw = new drw.Drawer @spec01
 
-    test 'draw something into a string', ->
-        html = @drw.draw()
-        assert.ok html.length > 10
-
     test 'uid2groupUid', ->
         assert.equal 'foo|bar|group', @drw.uid2groupUid 'foo|bar|z'
         assert.equal 'foo||group', @drw.uid2groupUid 'foo||'

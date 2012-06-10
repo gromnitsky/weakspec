@@ -4,6 +4,7 @@ class root.DomGenerator
 
     constructor: (@parent = null) ->
         @node = null
+        # for use in nested closures
         @d = root.DomGenerator
 
     @n: (parent, name, attr, nested) ->
