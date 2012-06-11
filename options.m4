@@ -17,21 +17,23 @@ include(`style.css')
   </head>
   <body>
     <div id='menu'>
-      <p>
-        <a href="options.help.html" target="_blank">Help</a>
-      </p>
+	<p>
+      <a href="options.help.html" target="_blank">Help</a>
+	</p>  
     </div>
 
     <div id='controls'>
+	<p>
       <button type='button' id='save'>Save All</button>
       <button type='button' id='reset'>Reset All to Defaults</button>
       <button type='button' id='clean'>Delete All Preferences</button>
       <button type='button' id='dump'>Dump Values to the Console</button>
+	</p>  
     </div>
 
     <div id='preferences'>
       <!-- A Drawer draws here -->
-      Wait for DOM rendering...
+      Wait for DOM rendering or (better) look into Error console.
     </div>
   </body>
 </html>

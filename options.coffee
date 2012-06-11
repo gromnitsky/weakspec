@@ -146,7 +146,7 @@ class EPref
         document.querySelectorAll "[id='#{gid}'] [class='pref']"
 
 errx = (msg) ->
-    insertHtml "<p><b>Error:</b> #{msg}</p>"
+    insertHtml "<p class='error'><b>Error:</b> #{msg}</p>"
 
 insertHtml = (html) ->
     innerPoint().innerHTML = html
@@ -213,8 +213,9 @@ mybind = (pref) ->
         
         document.querySelector('[id="menu"]').hidden = true
         document.querySelector('[id="controls"]').hidden = true
-        insertHtml "You've deleted any preferences for this extension.<br/>
-        <b>Please close this window.</b>"
+        insertHtml "<p class='error'>
+        You've deleted any preferences for this extension.<br/><br/>
+        Please close this window.</p>"
     , false
 
     # dump button
