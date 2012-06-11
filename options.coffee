@@ -66,12 +66,13 @@ class EPref
     # 1 or null on error.
     _mapping: (type) ->
         {
-            'string' : @peStringCallback,
-            'number' : @peNumberCallback,
-            'list' : @peListCallback,
+            'string' : @peStringCallback
+            'number' : @peStringCallback # yup
+            'list' : @peListCallback
             'bool' : @peBoolCallback
-            'text' : @peTextCallback
-            'color' : @peColorCallback
+            'text' : @peStringCallback # yup
+            'color' : @peStringCallback # yup
+            'email' : @peStringCallback # yup
         }[type] || throw new Error "no mapping method for type '#{type}'"
 
     peStringCallback: (element, operation, value) ->
@@ -80,9 +81,6 @@ class EPref
         return element.value if !operation
         element.value = value
         true
-
-    peNumberCallback: (element, operation, value) =>
-        @peStringCallback element, operation, value
 
     peListCallback: (element, operation, value) =>
         return null if !element
@@ -110,12 +108,6 @@ class EPref
         return element.checked if !operation
         element.checked = value
         true
-
-    peColorCallback: (element, operation, value) =>
-        @peStringCallback element, operation, value
-
-    peTextCallback: (element, operation, value) =>
-        @peStringCallback element, operation, value
 
     # Return a spec (a hash) for the particular PE (CE that corresponds
     # to PE will fit too).

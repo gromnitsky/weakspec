@@ -67,15 +67,23 @@ suite 'WeakSpec', ->
         @min_text = {
             "type" : null,
             "desc" : "z",
-            "default" : "12"
-            "allowEmpty" : false
+            "default" : "12",
+            "allowEmpty" : false,
             "range" : [2,4]
+        }
+        @min_email = {
+            "type" : null,
+            "desc" : "z",
+            "default" : "q@c",
+            "allowEmpty" : false
         }
 
     test 'smoke test', ->
         assert.equal 4, @ws01.size()
 
     test 'spec string validation ok', ->
+        check_val ws.PrefStr, ['validationRegexp'], 'hm', @min_string
+        
         @min_string.default = "qwe"
         check_val ws.PrefStr, ['allowEmpty'], false, @min_string
         check_val ws.PrefStr, ['validationRegexp'], 'q', @min_string
@@ -184,12 +192,24 @@ suite 'WeakSpec', ->
         @min_text.default = ''
         check_val ws.PrefText, ['allowEmpty'], true, @min_text
 
-    test 'spec bool validation fail', ->
+    test 'spec text validation fail', ->
         check_bogusVal ws.PrefText, ['default'], null, @min_text
         check_bogusVal ws.PrefText, ['default'], "1", @min_text
         check_bogusVal ws.PrefText, ['default'], "12345", @min_text
 
         check_bogusVal ws.PrefText, ['range'], [5,5], @min_text
+
+    test 'spec email validation ok', ->
+        assert.doesNotThrow =>
+            (new ws.PrefEmail 'foo', 'bar', @min_email).validateSpec()
+
+        @min_email.default = ''
+        check_val ws.PrefEmail, ['allowEmpty'], true, @min_email
+
+    test 'spec email validation fail', ->
+        check_bogusVal ws.PrefEmail, ['default'], "12345", @min_email
+        check_bogusVal ws.PrefEmail, ['default'], "q@", @min_email
+        check_bogusVal ws.PrefEmail, ['default'], "q@ e", @min_email
 
     test 'string validation', ->
         assert !@ws01.validate('Group 1', 'opt1', null)

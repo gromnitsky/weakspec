@@ -46,6 +46,7 @@ class root.WeakSpec
             'bool' : root.PrefBool,
             'text' : root.PrefText
             'color' : root.PrefColor
+            'email' : root.PrefEmail
         }[type] || throw new root.ParseError "no method for '#{type}' type"
 
     _validateUid: (group, name) ->
@@ -158,7 +159,7 @@ class root.PrefStr extends Pref
         # add 'default' check
         @local.push { 'default' : (val) =>
             return false if typeof val != 'string'
-            return false if val == '' && !@instr.allowEmpty
+            return @instr.allowEmpty if val == ''
             (return false unless val.match @instr.validationRegexp) if @instr.validationRegexp
             true
         }
@@ -226,7 +227,7 @@ class root.PrefText extends Pref
 
         @local.push { 'default' : (val) =>
             return false if typeof val != 'string'
-            return true if val == '' && @instr.allowEmpty
+            return @instr.allowEmpty if val == ''
             
             return false if val == ''
             return false unless this.inRange(@instr.range, val.length)
@@ -239,4 +240,20 @@ class root.PrefColor extends Pref
 
         @local.push { 'default' : (val) ->
             val.match /^#[A-Za-z0-9]{3,6}$/
+        }
+
+class root.PrefEmail extends Pref
+    constructor: (@group, @name, @instr) ->
+        super @group, @name, @instr
+
+        @local.push { 'allowEmpty' : (val) =>
+            this.isBoolean val
+        }
+
+        @local.push { 'default' : (val) =>
+            return false if typeof val != 'string'
+            return @instr.allowEmpty if val == ''
+
+            return false unless val.match /^[^ ]+@[^ ]+$/
+            true
         }

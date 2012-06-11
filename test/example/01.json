@@ -58,6 +58,13 @@ var weakspec = {
 			"help" : "A help string for an options #2 in group 5",
 			"type" : "color",
 			"default" : "#ff7f27"
+		},
+		"opt3" : {
+			"desc" : "Option #3 in group #5",
+			"help" : "A help string for an options #3 in group 5",
+			"type" : "email",
+			"default" : "joe@example.com",
+			"allowEmpty" : false
 		}
 	}
 }

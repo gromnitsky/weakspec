@@ -45,6 +45,7 @@ class root.Drawer
             when 'bool' then "#{group}|#{name}|pBool"
             when 'text' then "#{group}|#{name}|pText"
             when 'color' then "#{group}|#{name}|pColor"
+            when 'email' then "#{group}|#{name}|pEmail"
             else
                 new Error "invalid uid type '#{type}'"
 
@@ -65,6 +66,7 @@ class root.Drawer
             'bool' : @pBool
             'text' : @pText
             'color' : @pColor
+            'email' : @pEmail
         }
 
         throw new Error "invalid type '#{instr.type}'" unless mapping[instr.type]
@@ -139,5 +141,14 @@ class root.Drawer
             "id" : @uid(group, name, "color")
             "type" : "color"
         }
+        @DG.n parentDomGen, 'input', attr
+
+    pEmail: (parentDomGen, group, name, instr) =>
+        attr = {
+            "class" : "pref"
+            "id" : @uid(group, name, "email")
+            "type" : "email"
+        }
+        attr['required'] = "" if !instr.allowEmpty
         @DG.n parentDomGen, 'input', attr
         

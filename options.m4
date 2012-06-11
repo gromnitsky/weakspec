@@ -25,9 +25,9 @@ include(`style.css')
     <div id='controls'>
 	<p>
       <button type='button' id='save'>Save All</button>
-      <button type='button' id='reset'>Reset All to Defaults</button>
+      <button type='button' id='reset'>All to Defaults</button>
       <button type='button' id='clean'>Delete All Preferences</button>
-      <button type='button' id='dump'>Dump Values to the Console</button>
+      <button type='button' id='dump'>Dump to the Console</button>
 	</p>  
     </div>
 
