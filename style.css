@@ -13,6 +13,11 @@ body {
 	box-shadow: 4px 4px 4px 0px black;
 }
 
+img.right {
+    display: block;
+    margin-left: auto;
+}
+
 fieldset {
 	border: 1px solid #999;
 	margin: 20px 0 0 0;
