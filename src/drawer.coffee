@@ -26,9 +26,9 @@ class root.Drawer
                     o.generatePref this, group, name, instr for name, instr of opts
 
                 @d.n this, 'div', null, ->
-                    @d.n this, 'input', { 'type' : 'submit', 'value' : 'save' }
-                    @d.t this, ' '
                     @d.n this, 'input', { 'type' : 'reset' }
+                    @d.t this, ' '
+                    @d.n this, 'input', { 'type' : 'submit', 'value' : 'Save' }
 
             nodes.push grp.node
         nodes
@@ -44,6 +44,7 @@ class root.Drawer
             when 'list' then "#{group}|#{name}|pList"
             when 'bool' then "#{group}|#{name}|pBool"
             when 'text' then "#{group}|#{name}|pText"
+            when 'color' then "#{group}|#{name}|pColor"
             else
                 new Error "invalid uid type '#{type}'"
 
@@ -63,6 +64,7 @@ class root.Drawer
             'list' : @pList
             'bool' : @pBool
             'text' : @pText
+            'color' : @pColor
         }
 
         throw new Error "invalid type '#{instr.type}'" unless mapping[instr.type]
@@ -130,4 +132,12 @@ class root.Drawer
         attr['required'] = "" if !instr.allowEmpty
         attr['maxlength'] = instr.range[1] if instr.range
         @DG.n parentDomGen, 'textarea', attr
+
+    pColor: (parentDomGen, group, name, instr) =>
+        attr = {
+            "class" : "pref"
+            "id" : @uid(group, name, "color")
+            "type" : "color"
+        }
+        @DG.n parentDomGen, 'input', attr
         

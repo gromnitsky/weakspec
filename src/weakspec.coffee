@@ -45,6 +45,7 @@ class root.WeakSpec
             'list' : root.PrefList,
             'bool' : root.PrefBool,
             'text' : root.PrefText
+            'color' : root.PrefColor
         }[type] || throw new root.ParseError "no method for '#{type}' type"
 
     _validateUid: (group, name) ->
@@ -232,3 +233,10 @@ class root.PrefText extends Pref
             true
         }
         
+class root.PrefColor extends Pref
+    constructor: (@group, @name, @instr) ->
+        super @group, @name, @instr
+
+        @local.push { 'default' : (val) ->
+            val.match /^#[A-Za-z0-9]{3,6}$/
+        }

@@ -71,6 +71,7 @@ class EPref
             'list' : @peListCallback,
             'bool' : @peBoolCallback
             'text' : @peTextCallback
+            'color' : @peColorCallback
         }[type] || throw new Error "no mapping method for type '#{type}'"
 
     peStringCallback: (element, operation, value) ->
@@ -109,6 +110,9 @@ class EPref
         return element.checked if !operation
         element.checked = value
         true
+
+    peColorCallback: (element, operation, value) =>
+        @peStringCallback element, operation, value
 
     peTextCallback: (element, operation, value) =>
         @peStringCallback element, operation, value

@@ -52,6 +52,12 @@ var weakspec = {
 			"help" : "A help string for an options #1 in group 5",
 			"type" : "bool",
 			"default" : true
+		},
+		"opt2" : {
+			"desc" : "Option #2 in group #5",
+			"help" : "A help string for an options #2 in group 5",
+			"type" : "color",
+			"default" : "#ff7f27"
 		}
 	}
 }
