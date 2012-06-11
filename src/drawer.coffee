@@ -43,6 +43,7 @@ class root.Drawer
             when 'number' then "#{group}|#{name}|pNumber"
             when 'list' then "#{group}|#{name}|pList"
             when 'bool' then "#{group}|#{name}|pBool"
+            when 'text' then "#{group}|#{name}|pText"
             else
                 new Error "invalid uid type '#{type}'"
 
@@ -57,10 +58,11 @@ class root.Drawer
         throw new Error "no type" unless instr.type
 
         mapping = {
-            'string' : @pString,
-            'number' : @pNumber,
-            'list' : @pList,
+            'string' : @pString
+            'number' : @pNumber
+            'list' : @pList
             'bool' : @pBool
+            'text' : @pText
         }
 
         throw new Error "invalid type '#{instr.type}'" unless mapping[instr.type]
@@ -117,3 +119,15 @@ class root.Drawer
             "type" : "checkbox"
         }
         @DG.n parentDomGen, 'input', attr
+
+    pText: (parentDomGen, group, name, instr) =>
+        attr = {
+            "class" : "pref",
+            "id" : @uid(group, name, "text"),
+            "cols" : "30",
+            "rows" : 4
+        }
+        attr['required'] = "" if !instr.allowEmpty
+        attr['maxlength'] = instr.range[1] if instr.range
+        @DG.n parentDomGen, 'textarea', attr
+        

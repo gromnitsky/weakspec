@@ -64,6 +64,13 @@ suite 'WeakSpec', ->
             "desc" : "zzzzz",
             "default" : true
         }
+        @min_text = {
+            "type" : null,
+            "desc" : "z",
+            "default" : "12"
+            "allowEmpty" : false
+            "range" : [2,4]
+        }
 
     test 'smoke test', ->
         assert.equal 4, @ws01.size()
@@ -167,6 +174,23 @@ suite 'WeakSpec', ->
     test 'spec bool validation fail', ->
         check_bogusVal ws.PrefBool, ['default'], 'whoa', @min_bool
 
+    test 'spec text validation ok', ->
+        assert.doesNotThrow =>
+            (new ws.PrefText 'foo', 'bar', @min_text).validateSpec()
+
+        check_val ws.PrefText, ['default'], 'Yo', @min_text
+        check_val ws.PrefText, ['range'], [1,5], @min_text
+
+        @min_text.default = ''
+        check_val ws.PrefText, ['allowEmpty'], true, @min_text
+
+    test 'spec bool validation fail', ->
+        check_bogusVal ws.PrefText, ['default'], null, @min_text
+        check_bogusVal ws.PrefText, ['default'], "1", @min_text
+        check_bogusVal ws.PrefText, ['default'], "12345", @min_text
+
+        check_bogusVal ws.PrefText, ['range'], [5,5], @min_text
+
     test 'string validation', ->
         assert !@ws01.validate('Group 1', 'opt1', null)
         assert !@ws01.validate('Group 1', 'opt1', 'zzz')
@@ -201,4 +225,4 @@ suite 'WeakSpec', ->
     test 'bool validation', ->
         assert !@ws01.validate('Group 5', 'opt1', 'whoa')
         assert @ws01.validate('Group 5', 'opt1', false)
-
+        

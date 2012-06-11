@@ -70,6 +70,7 @@ class EPref
             'number' : @peNumberCallback,
             'list' : @peListCallback,
             'bool' : @peBoolCallback
+            'text' : @peTextCallback
         }[type] || throw new Error "no mapping method for type '#{type}'"
 
     peStringCallback: (element, operation, value) ->
@@ -109,6 +110,9 @@ class EPref
         element.checked = value
         true
 
+    peTextCallback: (element, operation, value) =>
+        @peStringCallback element, operation, value
+
     # Return a spec (a hash) for the particular PE (CE that corresponds
     # to PE will fit too).
     #
@@ -142,8 +146,7 @@ class EPref
         document.querySelectorAll "[id='#{gid}'] [class='pref']"
 
 errx = (msg) ->
-    insertHtml "<b>Error:</b> #{msg}"
-    alert "Error: #{msg}"
+    insertHtml "<p><b>Error:</b> #{msg}</p>"
 
 insertHtml = (html) ->
     innerPoint().innerHTML = html

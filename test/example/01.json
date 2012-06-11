@@ -26,6 +26,13 @@ var weakspec = {
 			"selectedSize" : [1, 2],
 			"validationCallback" : null,
 			"data" : ["one", "two", "three", "four"]
+		},
+		"opt2" : {
+			"desc" : "Option #2 in group #3",
+			"type" : "text",
+			"default" : "1q",
+			"allowEmpty" : false,
+			"range" : [2, 128]
 		}
 	},
 	"Group 4" : {

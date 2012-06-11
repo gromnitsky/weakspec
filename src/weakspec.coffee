@@ -43,7 +43,8 @@ class root.WeakSpec
             'string' : root.PrefStr,
             'number' : root.PrefNumber,
             'list' : root.PrefList,
-            'bool' : root.PrefBool
+            'bool' : root.PrefBool,
+            'text' : root.PrefText
         }[type] || throw new root.ParseError "no method for '#{type}' type"
 
     _validateUid: (group, name) ->
@@ -62,7 +63,7 @@ class root.WeakSpec
 # Interface to data validation from a specfile.
 class Pref
     constructor: (@group, @name, @instr) ->
-        throw new root.ParseError "no group or name or instractions" unless @group && @name && @instr
+        throw new root.ParseError "no group or name or instructions" unless @group && @name && @instr
         @req = {
             'desc' : (val) =>
                 this.isStr(val)
@@ -208,5 +209,26 @@ class root.PrefBool extends Pref
 
         @local.push { 'default' : (val) =>
             this.isBoolean val
+        }
+        
+class root.PrefText extends Pref
+    constructor: (@group, @name, @instr) ->
+        super @group, @name, @instr
+
+        @local.push { 'allowEmpty' : (val) =>
+            this.isBoolean val
+        }
+
+        @local.push { 'range' : (val) =>
+            this.isRange val
+        }
+
+        @local.push { 'default' : (val) =>
+            return false if typeof val != 'string'
+            return true if val == '' && @instr.allowEmpty
+            
+            return false if val == ''
+            return false unless this.inRange(@instr.range, val.length)
+            true
         }
         
