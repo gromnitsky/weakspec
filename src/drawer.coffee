@@ -47,6 +47,7 @@ class root.Drawer
             when 'color' then "#{group}|#{name}|pColor"
             when 'email' then "#{group}|#{name}|pEmail"
             when 'datetime' then "#{group}|#{name}|pDatetime"
+            when 'date' then "#{group}|#{name}|pDate"
             else
                 new Error "invalid uid type '#{type}'"
 
@@ -69,6 +70,7 @@ class root.Drawer
             'color' : @pColor
             'email' : @pEmail
             'datetime' : @pDatetime
+            'date' : @pDate
         }
 
         throw new Error "invalid type '#{instr.type}'" unless mapping[instr.type]
@@ -78,7 +80,8 @@ class root.Drawer
             @d.n this, 'th', null, ->
                 @d.t this, instr.desc
             @d.n this, 'td', null, ->
-                mapping[instr.type](this, group, name, instr)
+                # execute in the class instance context 'o'
+                mapping[instr.type].call(o, this, group, name, instr)
             @d.n this, 'td', null, ->
                 @d.n this, 'button', { 'type' : 'button', "class" : "bDefault", "id" : o.uid(group, name, "bDefault") }, ->
                     @d.t this, 'Default'
@@ -86,7 +89,7 @@ class root.Drawer
                 @d.n this, 'a', { "href" : "#", "class" : "bHelp", "id" : o.uid(group, name, "bHelp") }, ->
                     @d.t this, "?"
 
-    pString: (parentDomGen, group, name, instr) =>
+    pString: (parentDomGen, group, name, instr) ->
         attr = {
             "class" : "pref",
             "id" : @uid(group, name, "string")
@@ -95,7 +98,7 @@ class root.Drawer
         attr['required'] = "" if !instr.allowEmpty
         @DG.n parentDomGen, 'input', attr
 
-    pNumber: (parentDomGen, group, name, instr) =>
+    pNumber: (parentDomGen, group, name, instr) ->
         attr = {
             "class" : "pref",
             "id" : @uid(group, name, "number"),
@@ -106,7 +109,7 @@ class root.Drawer
         attr['max'] = instr.range[1] if instr.range
         @DG.n parentDomGen, 'input', attr
 
-    pList: (parentDomGen, group, name, instr) =>
+    pList: (parentDomGen, group, name, instr) ->
         attr = {
             "class" : "pref",
             "id" : @uid(group, name, "list"),
@@ -118,7 +121,7 @@ class root.Drawer
                 @d.n this, 'option', { 'value' : idx }, ->
                     @d.t this, idx
 
-    pBool: (parentDomGen, group, name, instr) =>
+    pBool: (parentDomGen, group, name, instr) ->
         attr = {
             "class" : "pref",
             "id" : @uid(group, name, "bool"),
@@ -126,7 +129,7 @@ class root.Drawer
         }
         @DG.n parentDomGen, 'input', attr
 
-    pText: (parentDomGen, group, name, instr) =>
+    pText: (parentDomGen, group, name, instr) ->
         attr = {
             "class" : "pref",
             "id" : @uid(group, name, "text"),
@@ -137,7 +140,7 @@ class root.Drawer
         attr['maxlength'] = instr.range[1] if instr.range
         @DG.n parentDomGen, 'textarea', attr
 
-    pColor: (parentDomGen, group, name, instr) =>
+    pColor: (parentDomGen, group, name, instr) ->
         attr = {
             "class" : "pref"
             "id" : @uid(group, name, "color")
@@ -145,7 +148,7 @@ class root.Drawer
         }
         @DG.n parentDomGen, 'input', attr
 
-    pEmail: (parentDomGen, group, name, instr) =>
+    pEmail: (parentDomGen, group, name, instr) ->
         attr = {
             "class" : "pref"
             "id" : @uid(group, name, "email")
@@ -154,13 +157,19 @@ class root.Drawer
         attr['required'] = "" if !instr.allowEmpty
         @DG.n parentDomGen, 'input', attr
 
-    pDatetime: (parentDomGen, group, name, instr) =>
+    # Common ground for datetime/date/time/week
+    pAbstractDate: (type, parentDomGen, group, name, instr) ->
         attr = {
             "class" : "pref"
-            "id" : @uid(group, name, "datetime")
-            "type" : "datetime"
+            "id" : @uid(group, name, type)
+            "type" : type
         }
         attr['required'] = "" if !instr.allowEmpty
         [attr['min'], attr['max']] = instr.range if instr.range
         @DG.n parentDomGen, 'input', attr
-        
+
+    pDatetime: (parentDomGen, group, name, instr) ->
+        @pAbstractDate 'datetime', parentDomGen, group, name, instr
+
+    pDate: (parentDomGen, group, name, instr) ->
+        @pAbstractDate 'date', parentDomGen, group, name, instr

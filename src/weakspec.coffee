@@ -48,6 +48,7 @@ class root.WeakSpec
             'color' : root.PrefColor
             'email' : root.PrefEmail
             'datetime' : root.PrefDatetime
+            'date' : root.PrefDate
         }[type] || throw new root.ParseError "no method for '#{type}' type"
 
     _validateUid: (group, name) ->
@@ -127,7 +128,7 @@ class Pref
     isArray: (t) ->
         t instanceof Array
 
-    isRange: (t) =>
+    isRange: (t) ->
         return false unless @isArray t
         return false if t.length != 2
         (return false if typeof idx != 'number') for idx in t

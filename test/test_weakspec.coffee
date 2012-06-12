@@ -84,6 +84,13 @@ suite 'WeakSpec', ->
             "allowEmpty" : true
             "range" : ['2000-03-01T00:00:00Z', '2001-03-01T00:00:00Z']
         }
+        @min_date = {
+            "desc" : "z"
+            "type" : null
+            "default" : "2000-03-01"
+            "allowEmpty" : true
+            "range" : ['2000-03-01', '2000-03-02']
+        }
 
     test 'smoke test', ->
         assert.equal 4, @ws01.size()
@@ -233,6 +240,21 @@ suite 'WeakSpec', ->
         check_bogusVal ws.PrefDatetime, ['range'], ["q@", "e"], @min_datetime
         check_bogusVal ws.PrefDatetime, ['range'], ["2020", "2019"], @min_datetime
 
+    test 'spec date validation ok', ->
+        assert.doesNotThrow =>
+            (new ws.PrefDate 'foo', 'bar', @min_date).validateSpec()
+
+        @min_date.default = ''
+        check_val ws.PrefDate, ['allowEmpty'], true, @min_date
+
+    test 'spec date validation fail', ->
+        check_bogusVal ws.PrefDate, ['default'], "q@", @min_date
+        check_bogusVal ws.PrefDate, ['default'], "q@ e", @min_date
+
+        check_bogusVal ws.PrefDate, ['range'], "q@ e", @min_date
+        check_bogusVal ws.PrefDate, ['range'], ["q@", "e"], @min_date
+        check_bogusVal ws.PrefDate, ['range'], ["2000-03-02", "2000-03-01"], @min_date
+
     test 'string validation', ->
         assert !@ws01.validate('Group 1', 'opt1', null)
         assert !@ws01.validate('Group 1', 'opt1', 'zzz')
@@ -260,9 +282,9 @@ suite 'WeakSpec', ->
         assert @ws01.validate('Group 3', 'opt1', ['one'])
         assert @ws01.validate('Group 3', 'opt1', ['one', 'two'])
 
-        assert !@ws01.validate('Group 4', 'opt1', ['five', 'six'])
-        assert !@ws01.validate('Group 4', 'opt1', ['qwe'])
-        assert @ws01.validate('Group 4', 'opt1', ['seven'])
+        assert !@ws01.validate('Group #4', 'opt1', ['five', 'six'])
+        assert !@ws01.validate('Group #4', 'opt1', ['qwe'])
+        assert @ws01.validate('Group #4', 'opt1', ['seven'])
 
     test 'bool validation', ->
         assert !@ws01.validate('Group 5', 'opt1', 'whoa')

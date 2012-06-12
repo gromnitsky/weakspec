@@ -40,7 +40,15 @@ var weakspec = {
 			"help" : "zzz",
 			"default" : "2000-03-01T00:00:00Z",
 			"allowEmpty" : true,
-			"range" : ['2000-03-01T00:00:00Z', '2001-03-01T00:00:00Z']
+			"range" : ['2000-03-01T00:00:00Z', '2001-03-02T00:00:00Z']
+		},
+		"opt4" : {
+			"desc" : "Option #4 in group #3",
+			"type" : "date",
+			"help" : "zzz",
+			"default" : "2000-03-01",
+			"allowEmpty" : true,
+			"range" : ['2000-03-01', '2000-03-02']
 		}
 		
 	},
