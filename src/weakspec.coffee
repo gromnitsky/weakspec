@@ -51,9 +51,8 @@ class root.WeakSpec
         }[type] || throw new root.ParseError "no method for '#{type}' type"
 
     _validateUid: (group, name) ->
-        re = /^[A-Za-z0-9_,. -]+$/
-        throw new root.ParseError "group: invalud value '#{group}'" unless group.match re
-        throw new root.ParseError "group: '#{group}': name: invalud value '#{name}'" unless name.match re
+        throw new root.ParseError "group: invalud value '#{group}'" unless group.indexOf('|') == -1
+        throw new root.ParseError "group: '#{group}': name: invalud value '#{name}'" unless name.indexOf('|') == -1
 
     validate: (group, name, value) ->
         type = @spec[group]?[name]?.type
@@ -139,9 +138,6 @@ class Pref
         return true if !range
         [min, max] = range
         t >= min && t <= max
-
-    isDatetime: (t) ->
-        !isNaN Date.parse(t)
 
     validate: (value) ->
         return @instr.validationCallback(value) if @instr.validationCallback
@@ -271,30 +267,41 @@ class root.PrefDatetime extends Pref
         }
 
         @local.push { 'range' : (val) =>
-            this.isRangeDate val
+            @isRange val
         }
         
         @local.push { 'default' : (val) =>
             return false if typeof val != 'string'
             return @instr.allowEmpty if val == ''
-            return false unless this.isDatetime val
+            return false unless @isDate val
 
             if @instr.range
-                range = (Date.parse idx for idx in @instr.range)
-                return false unless this.inRange range, Date.parse(val)
+                range = (@dateParse idx for idx in @instr.range)
+                return false unless this.inRange range, @dateParse(val)
 
             true
         }
 
-    # datetime-- iso 8601: 2012-06-12T12:00:00.000Z
-    isDatetime: (t) ->
+    # t--iso 8601: 2012-06-12T12:00:00Z
+    isDate: (t) ->
         d = new Date t
         d.toISOString().replace(/\.000Z$/, 'Z') == t
         
-    isRangeDate: (t) ->
-        return false unless @isArray t
+    isRange: (t) ->
+        return false unless this.isArray t
         return false if t.length != 2
-        (return false unless @isDatetime idx) for idx in t
-        return false unless Date.parse(t[0]) < Date.parse (t[1])
+        (return false unless @isDate idx) for idx in t
+        return false unless @dateParse(t[0]) < @dateParse(t[1])
         true
 
+    dateParse: (t) ->
+        Date.parse t
+
+class root.PrefDate extends root.PrefDatetime
+    constructor: (@group, @name, @instr) ->
+        super @group, @name, @instr
+
+    # t--'2012-06-12'
+    isDate: (t) ->
+        d = new Date t
+        d.toISOString().replace(/T.+Z$/, '') == t

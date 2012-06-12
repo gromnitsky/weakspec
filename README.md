@@ -14,6 +14,8 @@ Run tests:
 
 ## Bugs
 
+* Names of groups & preferences cannot contain `|` char.
+
 * `range` for `text` preference works only for upper limit due to
   availability of `maxlength` html5 attribute for a textarea element but
   absence of `minlength`.

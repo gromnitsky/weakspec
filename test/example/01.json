@@ -44,7 +44,7 @@ var weakspec = {
 		}
 		
 	},
-	"Group 4" : {
+	"Group #4" : {
 		"opt1" : {
 			"desc" : "Option #1 in group #4",
 			"help" : "A help string for an options #1 in group 4",
