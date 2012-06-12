@@ -49,6 +49,14 @@ var weakspec = {
 			"default" : "2000-03-01",
 			"allowEmpty" : true,
 			"range" : ['2000-03-01', '2000-03-02']
+		},
+		"opt5" : {
+			"desc" : "Option #5 in group #3",
+			"type" : "week",
+			"help" : "zzz",
+			"default" : "2000-W01",
+			"allowEmpty" : true,
+			"range" : ['2000-W01', '2000-W04']
 		}
 		
 	},

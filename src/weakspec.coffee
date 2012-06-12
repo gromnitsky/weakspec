@@ -49,6 +49,8 @@ class root.WeakSpec
             'email' : root.PrefEmail
             'datetime' : root.PrefDatetime
             'date' : root.PrefDate
+            'week' : root.PrefWeek
+            'time' : root.PrefTime
         }[type] || throw new root.ParseError "no method for '#{type}' type"
 
     _validateUid: (group, name) ->
@@ -292,7 +294,7 @@ class root.PrefDatetime extends Pref
         return false unless this.isArray t
         return false if t.length != 2
         (return false unless @isDate idx) for idx in t
-        return false unless @dateParse(t[0]) < @dateParse(t[1])
+        return false unless @dateParse(t[0]) <= @dateParse(t[1])
         true
 
     dateParse: (t) ->
@@ -306,3 +308,31 @@ class root.PrefDate extends root.PrefDatetime
     isDate: (t) ->
         d = new Date t
         d.toISOString().replace(/T.+Z$/, '') == t
+
+class root.PrefWeek extends root.PrefDatetime
+    constructor: (@group, @name, @instr) ->
+        super @group, @name, @instr
+
+    # converts '2000-W48' to '2000-12-01'
+    _dateweek2date: (t) ->
+        try
+            [dummy, y, w] = t.match /^([0-9]{4})-W([0-9]{2})$/
+        catch error
+            return null
+            
+        y = parseInt y
+        w = parseInt w
+        return null unless y && w
+        return null unless this.inRange [1, 48],  w
+
+        m = Math.ceil w/4
+        m = "0#{m}" if m < 10
+        "#{y}-#{m}-01"
+
+    dateParse: (t) ->
+        Date.parse @_dateweek2date(t)
+
+    # t--'2012-W10'
+    isDate: (t) ->
+        @dateParse t
+        

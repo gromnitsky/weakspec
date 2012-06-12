@@ -290,3 +290,13 @@ suite 'WeakSpec', ->
         assert !@ws01.validate('Group 5', 'opt1', 'whoa')
         assert @ws01.validate('Group 5', 'opt1', false)
 
+    test 'week parse', ->
+        p = new ws.PrefWeek 'foo', 'bar', '{}'
+        assert.equal '2000-01-01', p._dateweek2date '2000-W01'
+        assert.equal '2000-02-01', p._dateweek2date '2000-W05'
+        assert.equal '2000-12-01', p._dateweek2date '2000-W48'
+        assert.equal null, p._dateweek2date '2000-W49'
+        assert.equal null, p._dateweek2date '200-W01'
+        assert.equal null, p._dateweek2date '2000-W00'
+        assert.equal null, p._dateweek2date ''
+        assert.equal null, p._dateweek2date null

@@ -48,6 +48,8 @@ class root.Drawer
             when 'email' then "#{group}|#{name}|pEmail"
             when 'datetime' then "#{group}|#{name}|pDatetime"
             when 'date' then "#{group}|#{name}|pDate"
+            when 'week' then "#{group}|#{name}|pWeek"
+            when 'time' then "#{group}|#{name}|pTime"
             else
                 new Error "invalid uid type '#{type}'"
 
@@ -71,6 +73,8 @@ class root.Drawer
             'email' : @pEmail
             'datetime' : @pDatetime
             'date' : @pDate
+            'week' : @pWeek
+            'time' : @pTime
         }
 
         throw new Error "invalid type '#{instr.type}'" unless mapping[instr.type]
@@ -157,7 +161,7 @@ class root.Drawer
         attr['required'] = "" if !instr.allowEmpty
         @DG.n parentDomGen, 'input', attr
 
-    # Common ground for datetime/date/time/week
+    # Common ground for datetime/date/week/time
     pAbstractDate: (type, parentDomGen, group, name, instr) ->
         attr = {
             "class" : "pref"
@@ -173,3 +177,9 @@ class root.Drawer
 
     pDate: (parentDomGen, group, name, instr) ->
         @pAbstractDate 'date', parentDomGen, group, name, instr
+
+    pWeek: (parentDomGen, group, name, instr) ->
+        @pAbstractDate 'week', parentDomGen, group, name, instr
+
+    pTime: (parentDomGen, group, name, instr) ->
+        @pAbstractDate 'time', parentDomGen, group, name, instr
