@@ -335,4 +335,36 @@ class root.PrefWeek extends root.PrefDatetime
     # t--'2012-W10'
     isDate: (t) ->
         @dateParse t
+
+class root.PrefTime extends root.PrefDatetime
+    constructor: (@group, @name, @instr) ->
+        super @group, @name, @instr
+
+    # converts '12:13:14' to '2000-01-01T:12:13:00Z'
+    _time2date: (t) ->
+        try
+            [dummy, h, m, s] = t.match /^([0-9]{2}):([0-9]{2}):([0-9]{2})$/
+        catch error
+            return null
+
+        h = parseInt h
+        m = parseInt m
+        s = parseInt s
+        (return null unless typeof idx == 'number') for idx in [h, m, s]
         
+        return null unless this.inRange [0, 23], h
+        return null unless this.inRange [0, 59], m
+        return null unless this.inRange [0, 59], s
+
+        h = "0#{h}" if h < 10
+        m = "0#{m}" if m < 10
+        s = "0#{s}" if s < 10
+        "2000-01-01T#{h}:#{m}:#{s}Z"
+
+    dateParse: (t) ->
+        Date.parse @_time2date(t)
+
+    # t--'12:13:14'
+    isDate: (t) ->
+        @dateParse t
+                

@@ -300,3 +300,12 @@ suite 'WeakSpec', ->
         assert.equal null, p._dateweek2date '2000-W00'
         assert.equal null, p._dateweek2date ''
         assert.equal null, p._dateweek2date null
+
+    test 'time parse', ->
+        p = new ws.PrefTime 'foo', 'bar', '{}'
+        assert.equal '2000-01-01T00:00:00Z', p._time2date '00:00:00'
+        assert.equal '2000-01-01T23:59:59Z', p._time2date '23:59:59'
+        assert.equal '2000-01-01T01:01:01Z', p._time2date '01:01:01'
+        assert.equal null, p._time2date '01:01:0'
+        assert.equal null, p._time2date ''
+        assert.equal null, p._time2date null
