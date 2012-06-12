@@ -77,6 +77,13 @@ suite 'WeakSpec', ->
             "default" : "q@c",
             "allowEmpty" : false
         }
+        @min_datetime = {
+            "desc" : "z"
+            "type" : null
+            "default" : "2000-03-01T00:00:00Z"
+            "allowEmpty" : true
+            "range" : ['2000-03-01T00:00:00Z', '2001-03-01T00:00:00Z']
+        }
 
     test 'smoke test', ->
         assert.equal 4, @ws01.size()
@@ -211,6 +218,21 @@ suite 'WeakSpec', ->
         check_bogusVal ws.PrefEmail, ['default'], "q@", @min_email
         check_bogusVal ws.PrefEmail, ['default'], "q@ e", @min_email
 
+    test 'spec datetime validation ok', ->
+        assert.doesNotThrow =>
+            (new ws.PrefDatetime 'foo', 'bar', @min_datetime).validateSpec()
+
+        @min_datetime.default = ''
+        check_val ws.PrefDatetime, ['allowEmpty'], true, @min_datetime
+
+    test 'spec datetime validation fail', ->
+        check_bogusVal ws.PrefDatetime, ['default'], "q@", @min_datetime
+        check_bogusVal ws.PrefDatetime, ['default'], "q@ e", @min_datetime
+
+        check_bogusVal ws.PrefDatetime, ['range'], "q@ e", @min_datetime
+        check_bogusVal ws.PrefDatetime, ['range'], ["q@", "e"], @min_datetime
+        check_bogusVal ws.PrefDatetime, ['range'], ["2020", "2019"], @min_datetime
+
     test 'string validation', ->
         assert !@ws01.validate('Group 1', 'opt1', null)
         assert !@ws01.validate('Group 1', 'opt1', 'zzz')
@@ -245,4 +267,4 @@ suite 'WeakSpec', ->
     test 'bool validation', ->
         assert !@ws01.validate('Group 5', 'opt1', 'whoa')
         assert @ws01.validate('Group 5', 'opt1', false)
-        
+

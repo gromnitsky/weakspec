@@ -46,6 +46,7 @@ class root.Drawer
             when 'text' then "#{group}|#{name}|pText"
             when 'color' then "#{group}|#{name}|pColor"
             when 'email' then "#{group}|#{name}|pEmail"
+            when 'datetime' then "#{group}|#{name}|pDatetime"
             else
                 new Error "invalid uid type '#{type}'"
 
@@ -67,6 +68,7 @@ class root.Drawer
             'text' : @pText
             'color' : @pColor
             'email' : @pEmail
+            'datetime' : @pDatetime
         }
 
         throw new Error "invalid type '#{instr.type}'" unless mapping[instr.type]
@@ -150,5 +152,15 @@ class root.Drawer
             "type" : "email"
         }
         attr['required'] = "" if !instr.allowEmpty
+        @DG.n parentDomGen, 'input', attr
+
+    pDatetime: (parentDomGen, group, name, instr) =>
+        attr = {
+            "class" : "pref"
+            "id" : @uid(group, name, "datetime")
+            "type" : "datetime"
+        }
+        attr['required'] = "" if !instr.allowEmpty
+        [attr['min'], attr['max']] = instr.range if instr.range
         @DG.n parentDomGen, 'input', attr
         

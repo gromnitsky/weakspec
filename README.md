@@ -17,3 +17,5 @@ Run tests:
 * `range` for `text` preference works only for upper limit due to
   availability of `maxlength` html5 attribute for a textarea element but
   absence of `minlength`.
+
+* `datetime` expects iso 8601 format in UTC without decimal fractions.

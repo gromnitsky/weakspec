@@ -33,7 +33,16 @@ var weakspec = {
 			"default" : "1q",
 			"allowEmpty" : false,
 			"range" : [2, 128]
+		},
+		"opt3" : {
+			"desc" : "Option #3 in group #3",
+			"type" : "datetime",
+			"help" : "zzz",
+			"default" : "2000-03-01T00:00:00Z",
+			"allowEmpty" : true,
+			"range" : ['2000-03-01T00:00:00Z', '2001-03-01T00:00:00Z']
 		}
+		
 	},
 	"Group 4" : {
 		"opt1" : {

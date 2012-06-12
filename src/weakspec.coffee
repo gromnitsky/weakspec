@@ -40,13 +40,14 @@ class root.WeakSpec
 
     _mapping: (type) ->
         {
-            'string' : root.PrefStr,
-            'number' : root.PrefNumber,
-            'list' : root.PrefList,
-            'bool' : root.PrefBool,
+            'string' : root.PrefStr
+            'number' : root.PrefNumber
+            'list' : root.PrefList
+            'bool' : root.PrefBool
             'text' : root.PrefText
             'color' : root.PrefColor
             'email' : root.PrefEmail
+            'datetime' : root.PrefDatetime
         }[type] || throw new root.ParseError "no method for '#{type}' type"
 
     _validateUid: (group, name) ->
@@ -138,6 +139,9 @@ class Pref
         return true if !range
         [min, max] = range
         t >= min && t <= max
+
+    isDatetime: (t) ->
+        !isNaN Date.parse(t)
 
     validate: (value) ->
         return @instr.validationCallback(value) if @instr.validationCallback
@@ -257,3 +261,40 @@ class root.PrefEmail extends Pref
             return false unless val.match /^[^ ]+@[^ ]+$/
             true
         }
+
+class root.PrefDatetime extends Pref
+    constructor: (@group, @name, @instr) ->
+        super @group, @name, @instr
+
+        @local.push { 'allowEmpty' : (val) =>
+            this.isBoolean val
+        }
+
+        @local.push { 'range' : (val) =>
+            this.isRangeDate val
+        }
+        
+        @local.push { 'default' : (val) =>
+            return false if typeof val != 'string'
+            return @instr.allowEmpty if val == ''
+            return false unless this.isDatetime val
+
+            if @instr.range
+                range = (Date.parse idx for idx in @instr.range)
+                return false unless this.inRange range, Date.parse(val)
+
+            true
+        }
+
+    # datetime-- iso 8601: 2012-06-12T12:00:00.000Z
+    isDatetime: (t) ->
+        d = new Date t
+        d.toISOString().replace(/\.000Z$/, 'Z') == t
+        
+    isRangeDate: (t) ->
+        return false unless @isArray t
+        return false if t.length != 2
+        (return false unless @isDatetime idx) for idx in t
+        return false unless Date.parse(t[0]) < Date.parse (t[1])
+        true
+

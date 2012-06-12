@@ -73,6 +73,7 @@ class EPref
             'text' : @peStringCallback # yup
             'color' : @peStringCallback # yup
             'email' : @peStringCallback # yup
+            'datetime' : @peStringCallback # yup
         }[type] || throw new Error "no mapping method for type '#{type}'"
 
     peStringCallback: (element, operation, value) ->
