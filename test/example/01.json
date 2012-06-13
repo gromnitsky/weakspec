@@ -92,3 +92,6 @@ var weakspec = {
 		}
 	}
 }
+
+var weakspec_opts = {}
+weakspec_opts.header = "An example of a custom header."

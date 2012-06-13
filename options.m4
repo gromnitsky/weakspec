@@ -1,7 +1,15 @@
 <!DOCTYPE html>
+<!--
+
+  DO NOT CHANGE IT. The file was automatically generated
+  by syscmd(`json -a name version < package.json | tr -d "\n"')
+
+  To make changes, grab the source at http://github.com/gromnitsky/weakspec,
+  tweak it & compile a new version of 'options.html' file.
+  
+-->
 <html lang='en'>
   <head>
-    <meta name="generator" content="syscmd(`json -a name version < package.json | tr -d "\n"')" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Weakspec</title>
     <script src='options.weakspec.js'></script>
@@ -16,11 +24,9 @@ include(`style.css')
     </style>
   </head>
   <body>
-    <div id='menu'>
-	<p>
-      <a href="options.help.html" target="_blank">Help</a>
-	</p>  
-    </div>
+    <div id='header'>
+      <!-- Contents of weakspec_opts.header -->
+	</div>
 
     <div id='controls'>
 	<p>

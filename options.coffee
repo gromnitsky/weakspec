@@ -139,13 +139,13 @@ class EPref
         document.querySelector "[id='#{uid}']"
 
 errx = (msg) ->
-    insertHtml "<p class='error'><b>Error:</b> #{msg}</p>"
+    insertHtml 'preferences', "<p class='error'><b>Error:</b> #{msg}</p>"
 
-insertHtml = (html) ->
-    innerPoint().innerHTML = html
+insertHtml = (id, html) ->
+    innerPoint(id).innerHTML = html
 
-innerPoint = ->
-    document.querySelector('div[id="preferences"]')
+innerPoint = (id) ->
+    document.querySelector "div[id='#{id}']"
 
 # element -- DOM node
 uidParse = (element) ->
@@ -204,9 +204,9 @@ mybind = (pref) ->
 
         pref.storage.clean()
 
-        document.querySelector('[id="menu"]').hidden = true
+        document.querySelector('[id="header"]').hidden = true
         document.querySelector('[id="controls"]').hidden = true
-        insertHtml "<p class='error'>
+        insertHtml 'preferences', "<p class='error'>
         You've deleted any preferences for this extension.<br/><br/>
         Please close this window.</p>
         <p>
@@ -253,8 +253,9 @@ window.onload = ->
         errx "in spec: #{e.message}"
         return
 
-    insertHtml ''
-    innerPoint().appendChild idx for idx in ws.toDomElements()
+    weakspec_opts?.header && insertHtml 'header', weakspec_opts.header
+    insertHtml 'preferences', ''
+    innerPoint('preferences').appendChild idx for idx in ws.toDomElements()
 
     pref = new EPref ws
     mybind pref

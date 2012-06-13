@@ -13,6 +13,26 @@ body {
 	box-shadow: 4px 4px 4px 0px black;
 }
 
+/*
+#save:hover {
+	background: green;
+	color: white;
+}
+
+#reset:hover {
+	background: yellow;
+}
+
+#clean:hover {
+	background: red;
+	color: white;
+}
+*/
+
+#dump {
+	float:right;
+}
+
 img.right {
     display: block;
     margin-left: auto;
