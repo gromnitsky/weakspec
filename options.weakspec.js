@@ -1,1 +1,1 @@
-test/example/01.json
+test/example/01.js

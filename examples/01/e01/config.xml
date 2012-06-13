@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget xmlns='http://www.w3.org/ns/widgets'
+		id='http://example.com/e01' version='0.0.1'>
+  <name>e01</name>
+  <description>A example of all possible weakspec's widgets (go to
+  the extension's preferences to see them).</description>
+  <author href='http://example.com/e01' email='user@example.com'>John Doe</author>
+
+  <!-- <icon src='icons/64.png' /> -->
+  <!-- <icon src='icons/18.png' /> -->
+</widget>
+
