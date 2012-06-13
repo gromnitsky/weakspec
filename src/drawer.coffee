@@ -17,7 +17,7 @@ class root.Drawer
             o = this
 
             grp = @DG.n null, 'fieldset'
-            form = @DG.n grp, 'form', { 'id' : o.uid(group, '', 'group') }, ->
+            form = @DG.n grp, 'form', {}, ->
                 @d.n this, 'legend', null, ->
                     # caption
                     @d.t this, group
@@ -34,36 +34,11 @@ class root.Drawer
         nodes
 
     uid: (group, name, type) ->
-        switch type
-            when 'group' then "#{group}|#{name}|group"
-            when 'bHelp' then "#{group}|#{name}|bHelp"
-            when 'bDefault' then "#{group}|#{name}|bDefault"
+        return [group, name, type].join '|' if type in ['bHelp', 'bDefault']
+        [group, name, "p#{type}"].join '|'
 
-            when 'string' then "#{group}|#{name}|pString"
-            when 'number' then "#{group}|#{name}|pNumber"
-            when 'list' then "#{group}|#{name}|pList"
-            when 'bool' then "#{group}|#{name}|pBool"
-            when 'text' then "#{group}|#{name}|pText"
-            when 'color' then "#{group}|#{name}|pColor"
-            when 'email' then "#{group}|#{name}|pEmail"
-            when 'datetime' then "#{group}|#{name}|pDatetime"
-            when 'date' then "#{group}|#{name}|pDate"
-            when 'week' then "#{group}|#{name}|pWeek"
-            when 'time' then "#{group}|#{name}|pTime"
-            else
-                new Error "invalid uid type '#{type}'"
-
-    uid2groupUid: (uid) ->
-        return null unless uid
-        [group, name, eClass] = uid.trim().split '|'
-        return null unless group
-
-        @uid group, name ||= '', 'group'
-
-    generatePref: (parentDomGen, group, name, instr) ->
-        throw new Error "no type" unless instr.type
-
-        mapping = {
+    _mapping: (type) ->
+        {
             'string' : @pString
             'number' : @pNumber
             'list' : @pList
@@ -75,17 +50,21 @@ class root.Drawer
             'date' : @pDate
             'week' : @pWeek
             'time' : @pTime
-        }
+        }[type] || throw new Error "invalid type '#{type}'"
 
-        throw new Error "invalid type '#{instr.type}'" unless mapping[instr.type]
+    generatePref: (parentDomGen, group, name, instr) ->
+        try
+            @_mapping instr.type
+        catch e
+            throw new Error "cannot draw '#{instr.type}': #{e.message}"
+
         o = this
-        
         @DG.n parentDomGen, 'tr', null, ->
             @d.n this, 'th', null, ->
                 @d.t this, instr.desc
             @d.n this, 'td', null, ->
                 # execute in the class instance context 'o'
-                mapping[instr.type].call(o, this, group, name, instr)
+                o._mapping(instr.type).call(o, this, group, name, instr)
             @d.n this, 'td', null, ->
                 @d.n this, 'button', { 'type' : 'button', "class" : "bDefault", "id" : o.uid(group, name, "bDefault") }, ->
                     @d.t this, 'Default'

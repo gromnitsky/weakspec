@@ -138,13 +138,6 @@ class EPref
         uid =  @ws.drw.uid(group, name, type)
         document.querySelector "[id='#{uid}']"
 
-    # Return all PEs of the GOE that the element belongs to.
-    #
-    # element -- DOM node
-    e2groupElements: (element) ->
-        gid = @ws.drw.uid2groupUid element.id
-        document.querySelectorAll "[id='#{gid}'] [class='pref']"
-
 errx = (msg) ->
     insertHtml "<p class='error'><b>Error:</b> #{msg}</p>"
 
@@ -238,13 +231,13 @@ bSubmitCallback = (pref, form, event) ->
 
     console.log 'SUBMIT'
     event?.preventDefault()
-    e = pref.e2groupElements form
+    e = form.querySelectorAll "[class='pref']"
     pref.saveElementValue idx for idx in e
 
 bResetCallback = (pref, form, event) ->
     console.log 'RESET'
     event.preventDefault()
-    e = pref.e2groupElements form
+    e = form.querySelectorAll "[class='pref']"
     pref.setElement idx, pref.e2db idx for idx in e
 
 

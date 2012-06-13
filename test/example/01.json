@@ -57,14 +57,6 @@ var weakspec = {
 			"default" : "2000-W01",
 			"allowEmpty" : true,
 			"range" : ['2000-W01', '2000-W04']
-		},
-		"opt6" : {
-			"desc" : "Option #6 in group #3",
-			"type" : "time",
-			"help" : "zz zz",
-			"default" : "12:12:12",
-			"allowEmpty" : true,
-			"range" : ['11:10:11', '13:14:14']
 		}
 	},
 	"Group #4" : {

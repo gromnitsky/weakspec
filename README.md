@@ -21,3 +21,6 @@ Run tests:
   absence of `minlength`.
 
 * `datetime` expects iso 8601 format in UTC without decimal fractions.
+
+* `time` is broken. Probably it's an Opera bug, because `<input
+  type='time'>` cannot get through a validation phase.

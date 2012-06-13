@@ -13,10 +13,3 @@ suite 'Drawer', ->
         
         @drw = new drw.Drawer @spec01
 
-    test 'uid2groupUid', ->
-        assert.equal 'foo|bar|group', @drw.uid2groupUid 'foo|bar|z'
-        assert.equal 'foo||group', @drw.uid2groupUid 'foo||'
-        assert.equal null, @drw.uid2groupUid null
-        assert.equal null, @drw.uid2groupUid ''
-        assert.equal 'zzz||group', @drw.uid2groupUid 'zzz'
-        
