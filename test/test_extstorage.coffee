@@ -30,6 +30,9 @@ suite 'ExtStorage', ->
         assert.equal 2, @es.get('Group 1', 'malware 2')
         assert.equal null, @es.get('Group 1', 'bar')
 
-#        console.log @es.raw
+        @es.set 'Group 2', 'boolean', false
+        assert.equal false, @es.get('Group 2', 'boolean')
+
+#        console.log @es.raw()
         @es.clean()
         assert.equal {}.toString(), @es.raw().toString()

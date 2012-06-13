@@ -19,7 +19,7 @@ class EPref
 
         for group, prefs of @spec
             for name, instr of prefs
-                if !(@storage.get group, name)
+                if (@storage.get group, name) == null
                     @storage.set group, name, instr.default
                 else
                     # if DB contains invalid value (not conforming to
@@ -67,7 +67,7 @@ class EPref
     _mapping: (type) ->
         {
             'string' : @peStringCallback
-            'number' : @peStringCallback # yup
+            'number' : @peNumberCallback
             'list' : @peListCallback
             'bool' : @peBoolCallback
             'text' : @peStringCallback # yup
@@ -86,11 +86,18 @@ class EPref
         element.value = value
         true
 
+    peNumberCallback: (element, operation, value) ->
+        return null if !element
+
+        return parseInt(element.value) if !operation
+        element.value = value
+        true
+
     peListCallback: (element, operation, value) =>
         return null if !element
 
         if !operation # get
-            return element.value if element.type == 'select-one'
+            return [element.value] if element.type == 'select-one'
             # Return an array of selected options for HTML select. We
             # are not using 'new' selectedOptions() due to its brain
             # dead behaviour in 11.64.

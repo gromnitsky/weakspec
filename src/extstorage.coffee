@@ -20,7 +20,7 @@ class root.ExtStorage
                         
     get: (group, name) ->
         g = @_getGroup group
-        g[name] || null
+        if g[name] == undefined then null else g[name]
 
     set: (group, name, value) ->
         g = @_getGroup group
@@ -29,7 +29,7 @@ class root.ExtStorage
 
     clean: ->
         if widget?
-            widget.clear()
+            @db.clear()
         else
             delete @db[k] for k,v of @db
 
