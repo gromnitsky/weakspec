@@ -100,6 +100,9 @@ class Pref
             callback = @_localFind k
             throw new root.PrefError @group, @name, "'#{k}' is unknown" if callback == undefined
 
+        if @isValidationcallback(@instr.validationCallback)
+            return @instr.validationCallback.call(this, @instr.default)
+            
         # check for required locals
         for idx in @local
             option = (Object.keys idx)[0]
@@ -111,6 +114,8 @@ class Pref
             if callback && @instr[option] != null && !callback(@instr[option])
                 throw new root.PrefError @group, @name, "invalid value in '#{option}'"
 
+    isValidationcallback: (t) ->
+        typeof t == 'function'
 
     isStr: (t) ->
         return false if typeof t != 'string'
@@ -143,7 +148,9 @@ class Pref
         t >= min && t <= max
 
     validate: (value) ->
-        return @instr.validationCallback(value) if @instr.validationCallback
+        if @isValidationcallback(@instr.validationCallback)
+            return @instr.validationCallback.call(this, value)
+
         @_localFind('default')(value)
         
 

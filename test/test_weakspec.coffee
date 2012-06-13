@@ -102,6 +102,11 @@ suite 'WeakSpec', ->
         check_val ws.PrefStr, ['allowEmpty'], false, @min_string
         check_val ws.PrefStr, ['validationRegexp'], 'q', @min_string
 
+        @min_string.default = "zzz"
+        @min_string.validationCallback = (val) ->
+            true
+        check_val ws.PrefStr, ['validationRegexp'], 'qqq', @min_string
+
     test 'spec string validation fail', ->
         assert.throws ->
             (new ws.PrefStr 'foo', 'bar', {'default' : 'zzz'}).validateSpec()
@@ -265,6 +270,11 @@ suite 'WeakSpec', ->
         assert !@ws01.validate('Group 1', 'opt1', '')
         @spec01['Group 1']['opt1'].allowEmpty = true
         assert @ws01.validate('Group 1', 'opt1', '')
+
+        @spec01['Group 1']['opt1'].validationRegexp = 'qqq'
+        @spec01['Group 1']['opt1'].validationCallback = (val) ->
+            true
+        assert @ws01.validate('Group 1', 'opt1', 'zzz')
 
     test 'number validation', ->
         assert !@ws01.validate('Group 1', 'opt2', 'whoa')
