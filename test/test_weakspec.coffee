@@ -28,7 +28,7 @@ suite 'WeakSpec', ->
     setup ->
         process.chdir 'test' if path.basename(process.cwd()) != 'test'
         
-        eval fs.readFileSync('example/01.json', "ascii")
+        eval fs.readFileSync('example/01.js', "ascii")
         @spec01 = weakspec
         @ws01 = new ws.WeakSpec @spec01
 

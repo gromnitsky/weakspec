@@ -5,7 +5,7 @@ dg = require?('./domgenerator') || root
 class root.Drawer
     # spec must be validated with Pref* by WeakSpec
     constructor: (@spec) ->
-        throw new Error 'no valid spec' unless @spec && @size() > 1
+        throw new Error 'no valid spec' unless @spec && @size() >= 1
         @DG = dg.DomGenerator
 
     size: ->

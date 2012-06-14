@@ -3,6 +3,6 @@
 	"version" : "0.0.1",
 	"dependencies" : {
 		"mocha" : "1.0.3",
-		"coffee-script" : "1.3.3"
+		"xmlhttprequest" : "1.4.2"
 	}
 }

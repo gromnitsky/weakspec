@@ -1,0 +1,1 @@
+../../for-extensions/extstorage.js

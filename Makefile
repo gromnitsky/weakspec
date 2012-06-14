@@ -5,14 +5,17 @@ M4 := gm4
 coffee := $(wildcard *.coffee)
 js := $(patsubst %.coffee,%.js,$(coffee))
 
-.PHONY: clean clobber compile test browser jasmine
+.PHONY: clean clobber compile test browser jasmine forext
 
 all: test
 
 jasmine:
 	$(MAKE) -C test/spec-coffee
 
-test: compile jasmine
+forext:
+	$(MAKE) -C src/extension
+
+test: compile jasmine forext
 	$(MOCHA) --compilers coffee:coffee-script -u tdd
 
 compile: node_modules
@@ -32,6 +35,7 @@ clean:
 	rm -rf $(js) options.html
 	$(MAKE) -C src clean
 	$(MAKE) -C test/spec-coffee clean
+	$(MAKE) -C src/extension clean
 
 %.js: %.coffee
 	$(CS) -cp $< > $@

@@ -36,11 +36,11 @@ class root.ExtStorage
     size: ->
         (Object.keys @db).length
 
-    # Doesn't work outside of Opera extensions.
+    # Doesn't work outside Opera extensions.
     @Get: (group, name) ->
         (new root.ExtStorage()).get group, name
 
-    # Doesn't work outside of Opera extensions.
+    # Doesn't work outside Opera extensions.
     @Set: (group, name, value) ->
         (new root.ExtStorage()).set group, name, value
         

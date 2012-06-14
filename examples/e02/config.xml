@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget xmlns='http://www.w3.org/ns/widgets'
+		id='http://example.com/e02' version='0.0.1'>
+  <name>e02</name>
+  <description>Rotate DOM nodes.</description>
+  <author href='http://example.com/e02' email='user@example.com'>John Doe</author>
+
+  <!-- <icon src='icons/64.png' /> -->
+  <!-- <icon src='icons/18.png' /> -->
+</widget>
