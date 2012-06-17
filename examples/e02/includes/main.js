@@ -6,10 +6,15 @@
 	widget.preferences.prevAngle = 0
 	
 	function rotateElements() {
-		console.log(ExtStorage.Get('Rotation', 'angle'))
-		var angle = widget.preferences.prevAngle == 0 ? 180 : 0
+		var angle = widget.preferences.prevAngle == 0 ? ExtStorage.Get('Rotation', 'angle') : 0
+
+		try {
+			e = document.querySelectorAll(ExtStorage.Get('Rotation', 'domquery'))
+		} catch (e) {
+			alert("Invalid value in Rotation->domquery preference:\n" + e.message)
+			return
+		}
 		
-		e = document.querySelectorAll("img")
 		if (e.length == 0) {
 			alert('No images found on the page.')
 			return

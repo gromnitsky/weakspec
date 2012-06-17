@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<!--
+
+  DO NOT CHANGE IT. The file was automatically generated
+  by weakspec 0.0.1
+
+  To make changes, grab the source at http://github.com/gromnitsky/weakspec,
+  tweak it & compile a new version of 'options.html' file.
+  
+-->
+<html lang='en'>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Weakspec</title>
+    <script src='options.weakspec.js'></script>
+    
+    <script>
+(function() {
+  var Pref, dg, drw, root,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  drw = (typeof require === "function" ? require('./drawer') : void 0) || root;
+
+  root.ParseError = (function(_super) {
+
+    __extends(ParseError, _super);
+
+    function ParseError(msg) {
+      try {
+        Error.captureStackTrace(this, this.constructor);
+      } catch (e) {
+
+      }
+      this.name = this.constructor.name;
+      this.message = "parser: " + msg;
+    }
+
+    return ParseError;
+
+  })(Error);
+
+  root.PrefError = (function(_super) {
+
+    __extends(PrefError, _super);
+
+    function PrefError(group, prefName, msg) {
+      try {
+        Error.captureStackTrace(this, this.constructor);
+      } catch (e) {
+
+      }
+      this.name = this.constructor.name;
+      this.message = "parser: group '" + group + "': pref '" + prefName + "': " + msg;
+    }
+
+    return PrefError;
+
+  })(root.ParseError);
+
+  root.WeakSpec = (function() {
+
+    function WeakSpec(spec) {
+      var group, name, opts, _ref;
+      this.spec = spec;
+      if (this.size() < 1) {
+        throw new root.ParseError('the spec must contain at least 1 group');
+      }
+      _ref = this.spec;
+      for (group in _ref) {
+        opts = _ref[group];
+        for (name in opts) {
+          this.validateSpecPref(group, name);
+        }
+      }
+      this.drw = new drw.Drawer(this.spec);
+    }
+
+    WeakSpec.prototype.size = function() {
+      return (Object.keys(this.spec)).length;
+    };
+
+    WeakSpec.prototype.validateSpecPref = function(group, name) {
+      var instr;
+      instr = this.spec[group][name];
+      if (!instr.type) {
+        throw new root.PrefError(group, name, "no type");
+      }
+      this._validateUid(group, name);
+      return (new (this._mapping(instr.type))(group, name, instr)).validateSpec();
+    };
+
+    WeakSpec.prototype._mapping = function(type) {
+      return {
+        'string': root.PrefStr,
+        'number': root.PrefNumber,
+        'list': root.PrefList,
+        'bool': root.PrefBool,
+        'text': root.PrefText,
+        'color': root.PrefColor,
+        'email': root.PrefEmail,
+        'datetime': root.PrefDatetime,
+        'date': root.PrefDate,
+        'week': root.PrefWeek,
+        'time': root.PrefTime
+      }[type] || (function() {
+        throw new root.ParseError("no method for '" + type + "' type");
+      })();
+    };
+
+    WeakSpec.prototype._validateUid = function(group, name) {
+      if (group.indexOf('|') !== -1) {
+        throw new root.ParseError("group: invalud value '" + group + "'");
+      }
+      if (name.indexOf('|') !== -1) {
+        throw new root.ParseError("group: '" + group + "': name: invalud value '" + name + "'");
+      }
+    };
+
+    WeakSpec.prototype.validate = function(group, name, value) {
+      var type, _ref, _ref1;
+      type = (_ref = this.spec[group]) != null ? (_ref1 = _ref[name]) != null ? _ref1.type : void 0 : void 0;
+      if (!type) {
+        throw new Error("no type for " + group + "->" + name);
+      }
+      return (new (this._mapping(type))(group, name, this.spec[group][name])).validate(value);
+    };
+
+    WeakSpec.prototype.toDomElements = function() {
+      return this.drw.tree();
+    };
+
+    return WeakSpec;
+
+  })();
+
+  Pref = (function() {
+
+    function Pref(group, name, instr) {
+      var _this = this;
+      this.group = group;
+      this.name = name;
+      this.instr = instr;
+      if (!(this.group && this.name && this.instr)) {
+        throw new root.ParseError("no group or name or instructions");
+      }
+      this.req = {
+        'desc': function(val) {
+          return _this.isStr(val);
+        },
+        'type': null
+      };
+      this.local = [
+        {
+          'help': null
+        }, {
+          'validationCallback': null
+        }
+      ];
+    }
+
+    Pref.prototype._localFind = function(opt) {
+      var cb, idx, _i, _len, _ref;
+      _ref = this.local;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        idx = _ref[_i];
+        cb = (Object.keys(idx))[0];
+        if (cb === opt) {
+          return idx[cb];
+        }
+      }
+      return void 0;
+    };
+
+    Pref.prototype.validateSpec = function() {
+      var callback, idx, k, option, _i, _len, _ref, _ref1, _results;
+      if ((_ref = this.instr['default']) === null || _ref === (void 0)) {
+        throw new root.PrefError(this.group, this.name, "'default' cannot be null or missing");
+      }
+      for (k in this.req) {
+        if (this.instr[k] === void 0) {
+          throw new root.PrefError(this.group, this.name, "missing '" + k + "'");
+        }
+        if (this.req[k] && !this.req[k](this.instr[k])) {
+          throw new root.PrefError(this.group, this.name, "invalid value in '" + k + "'");
+        }
+      }
+      for (k in this.instr) {
+        if (!(this.req[k] === void 0)) {
+          continue;
+        }
+        callback = this._localFind(k);
+        if (callback === void 0) {
+          throw new root.PrefError(this.group, this.name, "'" + k + "' is unknown");
+        }
+      }
+      if (this.isValidationcallback(this.instr.validationCallback)) {
+        return this.instr.validationCallback.call(this, this.instr["default"]);
+      }
+      _ref1 = this.local;
+      _results = [];
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        idx = _ref1[_i];
+        option = (Object.keys(idx))[0];
+        callback = idx[option];
+        if (this.instr[option] === void 0 && callback !== null) {
+          throw new root.PrefError(this.group, this.name, "'" + option + "' is required (set if to null if you don't care)");
+        }
+        if (callback && this.instr[option] !== null && !callback(this.instr[option])) {
+          throw new root.PrefError(this.group, this.name, "invalid value in '" + option + "'");
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
+
+    Pref.prototype.isValidationcallback = function(t) {
+      return typeof t === 'function';
+    };
+
+    Pref.prototype.isStr = function(t) {
+      if (typeof t !== 'string') {
+        return false;
+      }
+      return !t.match(/^\s*$/);
+    };
+
+    Pref.prototype.isRegexp = function(t) {
+      if (typeof t !== 'string') {
+        return false;
+      }
+      try {
+        new RegExp(t);
+      } catch (error) {
+        return false;
+      }
+      return true;
+    };
+
+    Pref.prototype.isBoolean = function(t) {
+      return typeof t === 'boolean';
+    };
+
+    Pref.prototype.isArray = function(t) {
+      return t instanceof Array;
+    };
+
+    Pref.prototype.isRange = function(t) {
+      var idx, _i, _len;
+      if (!this.isArray(t)) {
+        return false;
+      }
+      if (t.length !== 2) {
+        return false;
+      }
+      for (_i = 0, _len = t.length; _i < _len; _i++) {
+        idx = t[_i];
+        if (typeof idx !== 'number') {
+          return false;
+        }
+      }
+      if (t[0] > t[1]) {
+        return false;
+      }
+      return true;
+    };
+
+    Pref.prototype.inRange = function(range, t) {
+      var max, min;
+      if (!range) {
+        return true;
+      }
+      min = range[0], max = range[1];
+      return t >= min && t <= max;
+    };
+
+    Pref.prototype.validate = function(value) {
+      if (this.isValidationcallback(this.instr.validationCallback)) {
+        return this.instr.validationCallback.call(this, value);
+      }
+      return this._localFind('default')(value);
+    };
+
+    return Pref;
+
+  })();
+
+  root.PrefStr = (function(_super) {
+
+    __extends(PrefStr, _super);
+
+    function PrefStr(group, name, instr) {
+      var _this = this;
+      this.group = group;
+      this.name = name;
+      this.instr = instr;
+      PrefStr.__super__.constructor.call(this, this.group, this.name, this.instr);
+      this.local.push({
+        'validationRegexp': function(val) {
+          return _this.isRegexp(val);
+        }
+      });
+      this.local.push({
+        'allowEmpty': function(val) {
+          return _this.isBoolean(val);
+        }
+      });
+      this.local.push({
+        'default': function(val) {
+          if (typeof val !== 'string') {
+            return false;
+          }
+          if (val === '') {
+            return _this.instr.allowEmpty;
+          }
+          if (_this.instr.validationRegexp) {
+            if (!val.match(_this.instr.validationRegexp)) {
+              return false;
+            }
+          }
+          return true;
+        }
+      });
+    }
+
+    return PrefStr;
+
+  })(Pref);
+
+  root.PrefNumber = (function(_super) {
+
+    __extends(PrefNumber, _super);
+
+    function PrefNumber(group, name, instr) {
+      var _this = this;
+      this.group = group;
+      this.name = name;
+      this.instr = instr;
+      PrefNumber.__super__.constructor.call(this, this.group, this.name, this.instr);
+      this.local.push({
+        'range': function(val) {
+          return _this.isRange(val);
+        }
+      });
+      this.local.push({
+        'default': function(val) {
+          if (typeof val !== 'number') {
+            return false;
+          }
+          if (!_this.inRange(_this.instr.range, val)) {
+            return false;
+          }
+          return true;
+        }
+      });
+    }
+
+    return PrefNumber;
+
+  })(Pref);
+
+  root.PrefList = (function(_super) {
+
+    __extends(PrefList, _super);
+
+    function PrefList(group, name, instr) {
+      var _this = this;
+      this.group = group;
+      this.name = name;
+      this.instr = instr;
+      PrefList.__super__.constructor.call(this, this.group, this.name, this.instr);
+      this.local.push({
+        'data': function(val) {
+          if (!_this.isArray(val)) {
+            return false;
+          }
+          return true;
+        }
+      });
+      this.local.push({
+        'selectedSize': function(val) {
+          if (!_this.isArray(val)) {
+            return false;
+          }
+          if (!_this.isRange(_this.instr.selectedSize)) {
+            return false;
+          }
+          if (!(val[0] <= _this.instr.data.length && val[1] <= _this.instr.data.length && val[0] > 0 && val[1] > 0)) {
+            return false;
+          }
+          return true;
+        }
+      });
+      this.local.push({
+        'default': function(val) {
+          var idx, _i, _len;
+          if (!(_this.isArray(val) && val.length)) {
+            return false;
+          }
+          if (!_this.isArray(_this.instr.data)) {
+            return false;
+          }
+          for (_i = 0, _len = val.length; _i < _len; _i++) {
+            idx = val[_i];
+            if (__indexOf.call(_this.instr.data, idx) < 0) {
+              return false;
+            }
+          }
+          if (!(val.length <= _this.instr.selectedSize[1])) {
+            return false;
+          }
+          return true;
+        }
+      });
+    }
+
+    return PrefList;
+
+  })(Pref);
+
+  root.PrefBool = (function(_super) {
+
+    __extends(PrefBool, _super);
+
+    function PrefBool(group, name, instr) {
+      var _this = this;
+      this.group = group;
+      this.name = name;
+      this.instr = instr;
+      PrefBool.__super__.constructor.call(this, this.group, this.name, this.instr);
+      this.local.push({
+        'default': function(val) {
+          return _this.isBoolean(val);
+        }
+      });
+    }
+
+    return PrefBool;
+
+  })(Pref);
+
+  root.PrefText = (function(_super) {
+
+    __extends(PrefText, _super);
+
+    function PrefText(group, name, instr) {
+      var _this = this;
+      this.group = group;
+      this.name = name;
+      this.instr = instr;
+      PrefText.__super__.constructor.call(this, this.group, this.name, this.instr);
+      this.local.push({
+        'allowEmpty': function(val) {
+          return _this.isBoolean(val);
+        }
+      });
+      this.local.push({
+        'range': function(val) {
+          return _this.isRange(val);
+        }
+      });
+      this.local.push({
+        'default': function(val) {
+          if (typeof val !== 'string') {
+            return false;
+          }
+          if (val === '') {
+            return _this.instr.allowEmpty;
+          }
+          if (val === '') {
+            return false;
+          }
+          if (!_this.inRange(_this.instr.range, val.length)) {
+            return false;
+          }
+          return true;
+        }
+      });
+    }
+
+    return PrefText;
+
+  })(Pref);
+
+  root.PrefColor = (function(_super) {
+
+    __extends(PrefColor, _super);
+
+    function PrefColor(group, name, instr) {
+      this.group = group;
+      this.name = name;
+      this.instr = instr;
+      PrefColor.__super__.constructor.call(this, this.group, this.name, this.instr);
+      this.local.push({
+        'default': function(val) {
+          return val.match(/^#[A-Za-z0-9]{3,6}$/);
+        }
+      });
+    }
+
+    return PrefColor;
+
+  })(Pref);
+
+  root.PrefEmail = (function(_super) {
+
+    __extends(PrefEmail, _super);
+
+    function PrefEmail(group, name, instr) {
+      var _this = this;
+      this.group = group;
+      this.name = name;
+      this.instr = instr;
+      PrefEmail.__super__.constructor.call(this, this.group, this.name, this.instr);
+      this.local.push({
+        'allowEmpty': function(val) {
+          return _this.isBoolean(val);
+        }
+      });
+      this.local.push({
+        'default': function(val) {
+          if (typeof val !== 'string') {
+            return false;
+          }
+          if (val === '') {
+            return _this.instr.allowEmpty;
+          }
+          if (!val.match(/^[^ ]+@[^ ]+$/)) {
+            return false;
+          }
+          return true;
+        }
+      });
+    }
+
+    return PrefEmail;
+
+  })(Pref);
+
+  root.PrefDatetime = (function(_super) {
+
+    __extends(PrefDatetime, _super);
+
+    function PrefDatetime(group, name, instr) {
+      var _this = this;
+      this.group = group;
+      this.name = name;
+      this.instr = instr;
+      PrefDatetime.__super__.constructor.call(this, this.group, this.name, this.instr);
+      this.local.push({
+        'allowEmpty': function(val) {
+          return _this.isBoolean(val);
+        }
+      });
+      this.local.push({
+        'range': function(val) {
+          return _this.isRange(val);
+        }
+      });
+      this.local.push({
+        'default': function(val) {
+          var idx, range;
+          if (typeof val !== 'string') {
+            return false;
+          }
+          if (val === '') {
+            return _this.instr.allowEmpty;
+          }
+          if (!_this.isDate(val)) {
+            return false;
+          }
+          if (_this.instr.range) {
+            range = (function() {
+              var _i, _len, _ref, _results;
+              _ref = this.instr.range;
+              _results = [];
+              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                idx = _ref[_i];
+                _results.push(this.dateParse(idx));
+              }
+              return _results;
+            }).call(_this);
+            if (!_this.inRange(range, _this.dateParse(val))) {
+              return false;
+            }
+          }
+          return true;
+        }
+      });
+    }
+
+    PrefDatetime.prototype.isDate = function(t) {
+      var d;
+      d = new Date(t);
+      return d.toISOString().replace(/\.000Z$/, 'Z') === t;
+    };
+
+    PrefDatetime.prototype.isRange = function(t) {
+      var idx, _i, _len;
+      if (!this.isArray(t)) {
+        return false;
+      }
+      if (t.length !== 2) {
+        return false;
+      }
+      for (_i = 0, _len = t.length; _i < _len; _i++) {
+        idx = t[_i];
+        if (!this.isDate(idx)) {
+          return false;
+        }
+      }
+      if (!(this.dateParse(t[0]) <= this.dateParse(t[1]))) {
+        return false;
+      }
+      return true;
+    };
+
+    PrefDatetime.prototype.dateParse = function(t) {
+      return Date.parse(t);
+    };
+
+    return PrefDatetime;
+
+  })(Pref);
+
+  root.PrefDate = (function(_super) {
+
+    __extends(PrefDate, _super);
+
+    function PrefDate(group, name, instr) {
+      this.group = group;
+      this.name = name;
+      this.instr = instr;
+      PrefDate.__super__.constructor.call(this, this.group, this.name, this.instr);
+    }
+
+    PrefDate.prototype.isDate = function(t) {
+      var d;
+      d = new Date(t);
+      return d.toISOString().replace(/T.+Z$/, '') === t;
+    };
+
+    return PrefDate;
+
+  })(root.PrefDatetime);
+
+  root.PrefWeek = (function(_super) {
+
+    __extends(PrefWeek, _super);
+
+    function PrefWeek(group, name, instr) {
+      this.group = group;
+      this.name = name;
+      this.instr = instr;
+      PrefWeek.__super__.constructor.call(this, this.group, this.name, this.instr);
+    }
+
+    PrefWeek.prototype._dateweek2date = function(t) {
+      var dummy, m, w, y, _ref;
+      try {
+        _ref = t.match(/^([0-9]{4})-W([0-9]{2})$/), dummy = _ref[0], y = _ref[1], w = _ref[2];
+      } catch (error) {
+        return null;
+      }
+      y = parseInt(y);
+      w = parseInt(w);
+      if (!(y && w)) {
+        return null;
+      }
+      if (!this.inRange([1, 48], w)) {
+        return null;
+      }
+      m = Math.ceil(w / 4);
+      if (m < 10) {
+        m = "0" + m;
+      }
+      return "" + y + "-" + m + "-01";
+    };
+
+    PrefWeek.prototype.dateParse = function(t) {
+      return Date.parse(this._dateweek2date(t));
+    };
+
+    PrefWeek.prototype.isDate = function(t) {
+      return this.dateParse(t);
+    };
+
+    return PrefWeek;
+
+  })(root.PrefDatetime);
+
+  root.PrefTime = (function(_super) {
+
+    __extends(PrefTime, _super);
+
+    function PrefTime(group, name, instr) {
+      this.group = group;
+      this.name = name;
+      this.instr = instr;
+      PrefTime.__super__.constructor.call(this, this.group, this.name, this.instr);
+    }
+
+    PrefTime.prototype._time2date = function(t) {
+      var dummy, h, idx, m, s, _i, _len, _ref, _ref1;
+      try {
+        _ref = t.match(/^([0-9]{2}):([0-9]{2}):([0-9]{2})$/), dummy = _ref[0], h = _ref[1], m = _ref[2], s = _ref[3];
+      } catch (error) {
+        return null;
+      }
+      h = parseInt(h);
+      m = parseInt(m);
+      s = parseInt(s);
+      _ref1 = [h, m, s];
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        idx = _ref1[_i];
+        if (typeof idx !== 'number') {
+          return null;
+        }
+      }
+      if (!this.inRange([0, 23], h)) {
+        return null;
+      }
+      if (!this.inRange([0, 59], m)) {
+        return null;
+      }
+      if (!this.inRange([0, 59], s)) {
+        return null;
+      }
+      if (h < 10) {
+        h = "0" + h;
+      }
+      if (m < 10) {
+        m = "0" + m;
+      }
+      if (s < 10) {
+        s = "0" + s;
+      }
+      return "2000-01-01T" + h + ":" + m + ":" + s + "Z";
+    };
+
+    PrefTime.prototype.dateParse = function(t) {
+      return Date.parse(this._time2date(t));
+    };
+
+    PrefTime.prototype.isDate = function(t) {
+      return this.dateParse(t);
+    };
+
+    return PrefTime;
+
+  })(root.PrefDatetime);
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  dg = (typeof require === "function" ? require('./domgenerator') : void 0) || root;
+
+  root.Drawer = (function() {
+
+    function Drawer(spec) {
+      this.spec = spec;
+      if (!(this.spec && this.size() >= 1)) {
+        throw new Error('no valid spec');
+      }
+      this.DG = dg.DomGenerator;
+    }
+
+    Drawer.prototype.size = function() {
+      return (Object.keys(this.spec)).length;
+    };
+
+    Drawer.prototype.tree = function() {
+      var form, group, grp, nodes, o, opts, _ref;
+      nodes = [];
+      _ref = this.spec;
+      for (group in _ref) {
+        opts = _ref[group];
+        o = this;
+        grp = this.DG.n(null, 'fieldset');
+        form = this.DG.n(grp, 'form', {}, function() {
+          this.d.n(this, 'legend', null, function() {
+            return this.d.t(this, group);
+          });
+          this.d.n(this, 'table', null, function() {
+            var instr, name, _results;
+            _results = [];
+            for (name in opts) {
+              instr = opts[name];
+              _results.push(o.generatePref(this, group, name, instr));
+            }
+            return _results;
+          });
+          return this.d.n(this, 'div', null, function() {
+            this.d.n(this, 'input', {
+              'type': 'reset'
+            });
+            this.d.t(this, ' ');
+            return this.d.n(this, 'input', {
+              'type': 'submit',
+              'value': 'Save'
+            });
+          });
+        });
+        nodes.push(grp.node);
+      }
+      return nodes;
+    };
+
+    Drawer.prototype.uid = function(group, name, type) {
+      if (type === 'bHelp' || type === 'bDefault') {
+        return [group, name, type].join('|');
+      }
+      return [group, name, "p" + type].join('|');
+    };
+
+    Drawer.prototype._mapping = function(type) {
+      return {
+        'string': this.pString,
+        'number': this.pNumber,
+        'list': this.pList,
+        'bool': this.pBool,
+        'text': this.pText,
+        'color': this.pColor,
+        'email': this.pEmail,
+        'datetime': this.pDatetime,
+        'date': this.pDate,
+        'week': this.pWeek,
+        'time': this.pTime
+      }[type] || (function() {
+        throw new Error("invalid type '" + type + "'");
+      })();
+    };
+
+    Drawer.prototype.generatePref = function(parentDomGen, group, name, instr) {
+      var o;
+      try {
+        this._mapping(instr.type);
+      } catch (e) {
+        throw new Error("cannot draw '" + instr.type + "': " + e.message);
+      }
+      o = this;
+      return this.DG.n(parentDomGen, 'tr', null, function() {
+        this.d.n(this, 'th', null, function() {
+          return this.d.t(this, instr.desc);
+        });
+        this.d.n(this, 'td', null, function() {
+          return o._mapping(instr.type).call(o, this, group, name, instr);
+        });
+        return this.d.n(this, 'td', null, function() {
+          this.d.n(this, 'button', {
+            'type': 'button',
+            "class": "bDefault",
+            "id": o.uid(group, name, "bDefault")
+          }, function() {
+            return this.d.t(this, 'Default');
+          });
+          this.d.t(this, ' ');
+          return this.d.n(this, 'a', {
+            "href": "#",
+            "class": "bHelp",
+            "id": o.uid(group, name, "bHelp")
+          }, function() {
+            return this.d.t(this, "?");
+          });
+        });
+      });
+    };
+
+    Drawer.prototype.pString = function(parentDomGen, group, name, instr) {
+      var attr;
+      attr = {
+        "class": "pref",
+        "id": this.uid(group, name, "string")
+      };
+      if (instr.validationRegexp) {
+        attr['pattern'] = instr.validationRegexp;
+      }
+      if (!instr.allowEmpty) {
+        attr['required'] = "";
+      }
+      return this.DG.n(parentDomGen, 'input', attr);
+    };
+
+    Drawer.prototype.pNumber = function(parentDomGen, group, name, instr) {
+      var attr;
+      attr = {
+        "class": "pref",
+        "id": this.uid(group, name, "number"),
+        "required": "",
+        "type": "number"
+      };
+      if (instr.range) {
+        attr['min'] = instr.range[0];
+      }
+      if (instr.range) {
+        attr['max'] = instr.range[1];
+      }
+      return this.DG.n(parentDomGen, 'input', attr);
+    };
+
+    Drawer.prototype.pList = function(parentDomGen, group, name, instr) {
+      var attr;
+      attr = {
+        "class": "pref",
+        "id": this.uid(group, name, "list"),
+        "required": ""
+      };
+      if (!(instr.selectedSize[0] === 1 && instr.selectedSize[1] === 1)) {
+        attr["multiple"] = "multiple";
+      }
+      return this.DG.n(parentDomGen, 'select', attr, function() {
+        var idx, _i, _len, _ref, _results;
+        _ref = instr.data;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          idx = _ref[_i];
+          _results.push(this.d.n(this, 'option', {
+            'value': idx
+          }, function() {
+            return this.d.t(this, idx);
+          }));
+        }
+        return _results;
+      });
+    };
+
+    Drawer.prototype.pBool = function(parentDomGen, group, name, instr) {
+      var attr;
+      attr = {
+        "class": "pref",
+        "id": this.uid(group, name, "bool"),
+        "type": "checkbox"
+      };
+      return this.DG.n(parentDomGen, 'input', attr);
+    };
+
+    Drawer.prototype.pText = function(parentDomGen, group, name, instr) {
+      var attr;
+      attr = {
+        "class": "pref",
+        "id": this.uid(group, name, "text"),
+        "cols": "30",
+        "rows": 4
+      };
+      if (!instr.allowEmpty) {
+        attr['required'] = "";
+      }
+      if (instr.range) {
+        attr['maxlength'] = instr.range[1];
+      }
+      return this.DG.n(parentDomGen, 'textarea', attr);
+    };
+
+    Drawer.prototype.pColor = function(parentDomGen, group, name, instr) {
+      var attr;
+      attr = {
+        "class": "pref",
+        "id": this.uid(group, name, "color"),
+        "type": "color"
+      };
+      return this.DG.n(parentDomGen, 'input', attr);
+    };
+
+    Drawer.prototype.pEmail = function(parentDomGen, group, name, instr) {
+      var attr;
+      attr = {
+        "class": "pref",
+        "id": this.uid(group, name, "email"),
+        "type": "email"
+      };
+      if (!instr.allowEmpty) {
+        attr['required'] = "";
+      }
+      return this.DG.n(parentDomGen, 'input', attr);
+    };
+
+    Drawer.prototype.pAbstractDate = function(type, parentDomGen, group, name, instr) {
+      var attr, _ref;
+      attr = {
+        "class": "pref",
+        "id": this.uid(group, name, type),
+        "type": type
+      };
+      if (!instr.allowEmpty) {
+        attr['required'] = "";
+      }
+      if (instr.range) {
+        _ref = instr.range, attr['min'] = _ref[0], attr['max'] = _ref[1];
+      }
+      return this.DG.n(parentDomGen, 'input', attr);
+    };
+
+    Drawer.prototype.pDatetime = function(parentDomGen, group, name, instr) {
+      return this.pAbstractDate('datetime', parentDomGen, group, name, instr);
+    };
+
+    Drawer.prototype.pDate = function(parentDomGen, group, name, instr) {
+      return this.pAbstractDate('date', parentDomGen, group, name, instr);
+    };
+
+    Drawer.prototype.pWeek = function(parentDomGen, group, name, instr) {
+      return this.pAbstractDate('week', parentDomGen, group, name, instr);
+    };
+
+    Drawer.prototype.pTime = function(parentDomGen, group, name, instr) {
+      return this.pAbstractDate('time', parentDomGen, group, name, instr);
+    };
+
+    return Drawer;
+
+  })();
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  root.ExtStorage = (function() {
+
+    function ExtStorage() {
+      this.db = (typeof widget !== "undefined" && widget !== null ? widget.preferences : void 0) || {};
+    }
+
+    ExtStorage.prototype.raw = function() {
+      return this.db;
+    };
+
+    ExtStorage.prototype._getGroup = function(group) {
+      var g;
+      try {
+        g = JSON.parse(this.db[group]);
+      } catch (e) {
+        return {};
+      }
+      return g || {};
+    };
+
+    ExtStorage.prototype.get = function(group, name) {
+      var g;
+      g = this._getGroup(group);
+      if (g[name] === void 0) {
+        return null;
+      } else {
+        return g[name];
+      }
+    };
+
+    ExtStorage.prototype.set = function(group, name, value) {
+      var g;
+      g = this._getGroup(group);
+      g[name] = value;
+      return this.db[group] = JSON.stringify(g);
+    };
+
+    ExtStorage.prototype.clean = function() {
+      var k, v, _ref, _results;
+      if (typeof widget !== "undefined" && widget !== null) {
+        return this.db.clear();
+      } else {
+        _ref = this.db;
+        _results = [];
+        for (k in _ref) {
+          v = _ref[k];
+          _results.push(delete this.db[k]);
+        }
+        return _results;
+      }
+    };
+
+    ExtStorage.prototype.size = function() {
+      return (Object.keys(this.db)).length;
+    };
+
+    ExtStorage.Get = function(group, name) {
+      return (new root.ExtStorage()).get(group, name);
+    };
+
+    ExtStorage.Set = function(group, name, value) {
+      return (new root.ExtStorage()).set(group, name, value);
+    };
+
+    return ExtStorage;
+
+  })();
+
+  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  root.DomGenerator = (function() {
+
+    function DomGenerator(parent) {
+      this.parent = parent != null ? parent : null;
+      this.node = null;
+      this.d = root.DomGenerator;
+    }
+
+    DomGenerator.n = function(parent, name, attr, nested) {
+      if (!name) {
+        throw new Error("cannot create a node without a name");
+      }
+      dg = new root.DomGenerator(parent);
+      dg.node = dg.createNode(name, attr);
+      dg.insaf(parent != null ? parent.node : void 0);
+      if (nested) {
+        nested.call(dg);
+      }
+      return dg;
+    };
+
+    DomGenerator.t = function(parent, string) {
+      if (!string) {
+        throw new Error("cannot create a text without a string");
+      }
+      dg = new root.DomGenerator(parent);
+      dg.node = dg.createText(string);
+      dg.insaf(parent != null ? parent.node : void 0);
+      return dg;
+    };
+
+    DomGenerator.prototype.createNode = function(name, attr) {
+      var k, node, v;
+      node = document.createElement(name);
+      for (k in attr) {
+        v = attr[k];
+        node.setAttribute(k, v);
+      }
+      return node;
+    };
+
+    DomGenerator.prototype.createText = function(string) {
+      return document.createTextNode(string);
+    };
+
+    DomGenerator.prototype.insaf = function(parentNode) {
+      if (!parentNode) {
+        return;
+      }
+      parentNode.appendChild(this.node);
+      return this.parent = parentNode;
+    };
+
+    return DomGenerator;
+
+  })();
+
+}).call(this);
+
+// Generated by CoffeeScript 1.3.3
+(function() {
+  var EPref, bDefaultCallback, bHelpCallback, bResetCallback, bSubmitCallback, errx, innerPoint, insertHtml, mybind, uidParse,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  EPref = (function() {
+
+    function EPref(ws) {
+      var e, group, idx, instr, name, prefs, _i, _len, _ref;
+      this.ws = ws;
+      this.peListCallback = __bind(this.peListCallback, this);
+
+      this.spec = ws.spec;
+      this.storage = new ExtStorage();
+      _ref = this.spec;
+      for (group in _ref) {
+        prefs = _ref[group];
+        for (name in prefs) {
+          instr = prefs[name];
+          if ((this.storage.get(group, name)) === null) {
+            this.storage.set(group, name, instr["default"]);
+          } else {
+            if (!this.ws.validate(group, name, this.storage.get(group, name))) {
+              console.warn("" + group + "->" + name + ": invalid value '" + (this.storage.get(group, name)) + "'; reverting to default");
+              this.storage.set(group, name, instr["default"]);
+            }
+          }
+        }
+      }
+      e = document.querySelectorAll('[class="pref"]');
+      for (_i = 0, _len = e.length; _i < _len; _i++) {
+        idx = e[_i];
+        this.setElement(idx, this.e2db(idx));
+      }
+    }
+
+    EPref.prototype.setElement = function(element, value) {
+      var eClass, group, name, _ref;
+      if ((this._mapping(this.e2spec(element).type))(element, 1, value)) {
+        _ref = uidParse(element), group = _ref[0], name = _ref[1], eClass = _ref[2];
+        console.log("set " + group + "->" + name + " to '" + value + "'");
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    EPref.prototype.getElementValue = function(element) {
+      return (this._mapping(this.e2spec(element).type))(element);
+    };
+
+    EPref.prototype.saveElementValue = function(element) {
+      var eClass, group, name, _ref;
+      _ref = uidParse(element), group = _ref[0], name = _ref[1], eClass = _ref[2];
+      this.storage.set(group, name, this.getElementValue(element));
+      return console.log("SAVED " + group + "->" + name);
+    };
+
+    EPref.prototype._mapping = function(type) {
+      return {
+        'string': this.peStringCallback,
+        'number': this.peNumberCallback,
+        'list': this.peListCallback,
+        'bool': this.peBoolCallback,
+        'text': this.peStringCallback,
+        'color': this.peStringCallback,
+        'email': this.peStringCallback,
+        'datetime': this.peStringCallback,
+        'date': this.peStringCallback,
+        'week': this.peStringCallback,
+        'time': this.peStringCallback
+      }[type] || (function() {
+        throw new Error("no mapping method for type '" + type + "'");
+      })();
+    };
+
+    EPref.prototype.peStringCallback = function(element, operation, value) {
+      if (!element) {
+        return null;
+      }
+      if (!operation) {
+        return element.value;
+      }
+      element.value = value;
+      return true;
+    };
+
+    EPref.prototype.peNumberCallback = function(element, operation, value) {
+      if (!element) {
+        return null;
+      }
+      if (!operation) {
+        return parseInt(element.value);
+      }
+      element.value = value;
+      return true;
+    };
+
+    EPref.prototype.peListCallback = function(element, operation, value) {
+      var idx, _i, _j, _len, _len1, _ref, _ref1, _ref2, _results;
+      if (!element) {
+        return null;
+      }
+      if (!operation) {
+        if (element.type === 'select-one') {
+          return [element.value];
+        }
+        _ref = element.options;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          idx = _ref[_i];
+          if (idx.selected) {
+            _results.push(idx.value);
+          }
+        }
+        return _results;
+      } else {
+        if (element.type === 'select-one') {
+          element.value = value;
+          return true;
+        }
+        element.selectedIndex = -1;
+        _ref1 = element.options;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          idx = _ref1[_j];
+          if (_ref2 = idx.text, __indexOf.call(value, _ref2) >= 0) {
+            idx.selected = true;
+          }
+        }
+        return true;
+      }
+    };
+
+    EPref.prototype.peBoolCallback = function(element, operation, value) {
+      if (!element) {
+        return null;
+      }
+      if (!operation) {
+        return element.checked;
+      }
+      element.checked = value;
+      return true;
+    };
+
+    EPref.prototype.e2spec = function(element) {
+      var eClass, group, name, _ref;
+      _ref = uidParse(element), group = _ref[0], name = _ref[1], eClass = _ref[2];
+      return this.spec[group][name];
+    };
+
+    EPref.prototype.e2db = function(element) {
+      var eClass, group, name, _ref;
+      _ref = uidParse(element), group = _ref[0], name = _ref[1], eClass = _ref[2];
+      return this.storage.get(group, name);
+    };
+
+    EPref.prototype.control2e = function(element) {
+      var eClass, group, name, type, uid, _ref;
+      type = this.e2spec(element).type;
+      _ref = uidParse(element), group = _ref[0], name = _ref[1], eClass = _ref[2];
+      uid = this.ws.drw.uid(group, name, type);
+      return document.querySelector("[id='" + uid + "']");
+    };
+
+    return EPref;
+
+  })();
+
+  errx = function(msg) {
+    return insertHtml('preferences', "<p class='error'><b>Error:</b> " + msg + "</p>");
+  };
+
+  insertHtml = function(id, html) {
+    return innerPoint(id).innerHTML = html;
+  };
+
+  innerPoint = function(id) {
+    return document.querySelector("div[id='" + id + "']");
+  };
+
+  uidParse = function(element) {
+    var uid;
+    if (!(uid = element.id)) {
+      throw new Error("no uid on " + element.tagName);
+    }
+    return uid.split('|');
+  };
+
+  mybind = function(pref) {
+    var e, idx, _i, _j, _k, _len, _len1, _len2;
+    e = document.querySelectorAll('[class="bHelp"]');
+    for (_i = 0, _len = e.length; _i < _len; _i++) {
+      idx = e[_i];
+      idx.addEventListener('mouseover', function() {
+        return bHelpCallback(pref, this);
+      }, false);
+      idx.onclick = function() {
+        return false;
+      };
+    }
+    e = document.querySelectorAll('[class="bDefault"]');
+    for (_j = 0, _len1 = e.length; _j < _len1; _j++) {
+      idx = e[_j];
+      idx.addEventListener('click', function() {
+        return bDefaultCallback(pref, this);
+      }, false);
+    }
+    e = document.querySelectorAll('form');
+    for (_k = 0, _len2 = e.length; _k < _len2; _k++) {
+      idx = e[_k];
+      idx.addEventListener('submit', function(event) {
+        return bSubmitCallback(pref, this, event);
+      }, false);
+      idx.addEventListener('reset', function(event) {
+        return bResetCallback(pref, this, event);
+      }, false);
+    }
+    (document.querySelector("[id='save']")).addEventListener('click', function() {
+      var _l, _len3, _results;
+      if (!confirm("Are you sure?")) {
+        return;
+      }
+      e = document.querySelectorAll("form input[type='submit']");
+      _results = [];
+      for (_l = 0, _len3 = e.length; _l < _len3; _l++) {
+        idx = e[_l];
+        _results.push(idx.click());
+      }
+      return _results;
+    }, false);
+    (document.querySelector("[id='reset']")).addEventListener('click', function() {
+      var _l, _len3, _results;
+      if (!confirm("Are you sure?")) {
+        return;
+      }
+      e = document.querySelectorAll('[class="bDefault"]');
+      _results = [];
+      for (_l = 0, _len3 = e.length; _l < _len3; _l++) {
+        idx = e[_l];
+        _results.push(idx.click());
+      }
+      return _results;
+    }, false);
+    (document.querySelector("[id='clean']")).addEventListener('click', function() {
+      if (!confirm("This will delete all preferences for this " + "extension from Opera. After that it'll be the same as if you have " + "installed this extension for the first time.\n\n" + "Are you sure?")) {
+        return;
+      }
+      pref.storage.clean();
+      document.querySelector('[id="header"]').hidden = true;
+      document.querySelector('[id="controls"]').hidden = true;
+      return insertHtml('preferences', "<p class='error'>        You've deleted any preferences for this extension.<br/><br/>        Please close this window.</p>        <p>        <img class='right' alt='A malcontent frog' src='data:image/png;base64,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'>        </p>");
+    }, false);
+    return (document.querySelector("[id='dump']")).addEventListener('click', function() {
+      return console.log(pref.storage.raw());
+    }, false);
+  };
+
+  bHelpCallback = function(pref, anchor) {
+    var _ref;
+    return anchor.title = (_ref = pref.e2spec(anchor).help) != null ? _ref : "Huh?";
+  };
+
+  bDefaultCallback = function(pref, button) {
+    console.log('DEFAULT');
+    return pref.setElement(pref.control2e(button), pref.e2spec(button)["default"]);
+  };
+
+  bSubmitCallback = function(pref, form, event) {
+    var e, idx, _i, _len, _results;
+    if (!form.checkValidity()) {
+      return;
+    }
+    console.log('SUBMIT');
+    if (event != null) {
+      event.preventDefault();
+    }
+    e = form.querySelectorAll("[class='pref']");
+    _results = [];
+    for (_i = 0, _len = e.length; _i < _len; _i++) {
+      idx = e[_i];
+      _results.push(pref.saveElementValue(idx));
+    }
+    return _results;
+  };
+
+  bResetCallback = function(pref, form, event) {
+    var e, idx, _i, _len, _results;
+    console.log('RESET');
+    event.preventDefault();
+    e = form.querySelectorAll("[class='pref']");
+    _results = [];
+    for (_i = 0, _len = e.length; _i < _len; _i++) {
+      idx = e[_i];
+      _results.push(pref.setElement(idx, pref.e2db(idx)));
+    }
+    return _results;
+  };
+
+  window.onload = function() {
+    var idx, pref, ws, _i, _len, _ref;
+    if (typeof weakspec === 'undefined' || weakspec === null) {
+      errx("File 'options.weakspec.js' not loaded");
+      return;
+    }
+    try {
+      ws = new WeakSpec(weakspec);
+    } catch (e) {
+      errx("in spec: " + e.message);
+      return;
+    }
+    (typeof weakspec_opts !== "undefined" && weakspec_opts !== null ? weakspec_opts.header : void 0) && insertHtml('header', weakspec_opts.header);
+    insertHtml('preferences', '');
+    _ref = ws.toDomElements();
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      idx = _ref[_i];
+      innerPoint('preferences').appendChild(idx);
+    }
+    pref = new EPref(ws);
+    return mybind(pref);
+  };
+
+}).call(this);
+
+    </script>
+    
+    <style>
+body {
+	width: 800px;
+	margin: 0px auto;
+}
+
+.error {
+	background: red;
+	color: white;
+	padding: 20px;
+	font-size: 150%;
+	border-radius: 6px;
+	line-height: 0.8;
+	box-shadow: 4px 4px 4px 0px black;
+}
+
+/*
+#save:hover {
+	background: green;
+	color: white;
+}
+
+#reset:hover {
+	background: yellow;
+}
+
+#clean:hover {
+	background: red;
+	color: white;
+}
+*/
+
+#dump {
+	float:right;
+}
+
+img.right {
+    display: block;
+    margin-left: auto;
+}
+
+fieldset {
+	border: 1px solid #999;
+	margin: 20px 0 0 0;
+	padding: 0;
+	clear: both;
+	box-sizing: border-box;
+	width: 100%;
+	border-radius: 6px;
+}
+
+fieldset div {
+	background: #f1f1f1;
+	padding: 5px 5px 4px 5px;
+	margin: 0 -1px -4px -1px;
+	border: 1px solid #999;
+	border-top-color: rgba(0,0,0,0.1);
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+}
+
+legend {
+	box-sizing: border-box;
+	width: 100%;
+	padding: 0 10px 0 20px;
+	color: #F1F1F1;
+	background-image: -o-linear-gradient(top, #D6D6D6, #262626);
+	font-weight: bold;
+	text-indent: -15px;
+	line-height: 1.7;
+	border-bottom: 1px solid #ccc;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+}
+
+table {
+	font-size: 100%;
+	border-spacing: 0;
+	border-collapse: collapse;
+	width: 100%;
+	margin: 0;
+}
+
+th {
+	text-align: left;
+	width: 50%;
+	padding: 5px 5px 5px 20px;
+	font-weight: normal;
+	border-bottom: none;
+}
+
+tr {
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+tr:nth-child(even) {
+	background-color: rgba(0,0,0,0.03);  
+}
+
+table td:nth-child(2) {
+	width: 30%;
+}
+
+table td:nth-child(3) {
+	text-align: right;
+}
+
+td {
+	text-align: left;
+	padding: 0.2em 1em 0.2em 0;
+	vertical-align: top; 
+}
+
+td a {
+	text-decoration: none;
+	margin: 0;
+	display: inline-block;
+	text-align: center;
+	line-height: 20px;
+	width: 18px;
+	height: 18px;
+	border-radius:4px;
+	color: #fff;
+	background: rgba(0,0,0,0.15);
+	text-shadow:0 -1px 0 rgba(0,0,0,0.15);
+	border:1px solid rgba(0,0,0,0.15);
+}
+
+td a:hover {
+	background: #5D9DF5;
+	color: #fff;
+}
+
+    </style>
+  </head>
+  <body>
+    <div id='header'>
+      <!-- Contents of weakspec_opts.header -->
+	</div>
+
+    <div id='controls'>
+	<p>
+      <button type='button' id='save'>Save All</button>
+      <button type='button' id='reset'>All to Defaults</button>
+      <button type='button' id='clean'>Delete All Preferences</button>
+      <button type='button' id='dump'>Dump to the Console</button>
+	</p>  
+    </div>
+
+    <div id='preferences'>
+      <!-- A Drawer draws here -->
+      Wait for DOM rendering or (better) look into Error console.
+    </div>
+  </body>
+</html>
