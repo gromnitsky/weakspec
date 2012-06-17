@@ -11,7 +11,6 @@
 <html lang='en'>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Weakspec</title>
     <script src='options.weakspec.js'></script>
     
     <script>
@@ -32,8 +31,10 @@ include(`style.css')
 	<p>
       <button type='button' id='save'>Save All</button>
       <button type='button' id='reset'>All to Defaults</button>
+	  <span id='debug'>
       <button type='button' id='clean'>Delete All Preferences</button>
       <button type='button' id='dump'>Dump to the Console</button>
+	  </span>
 	</p>  
     </div>
 

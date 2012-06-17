@@ -4,7 +4,8 @@ Generates a usable preferences page for Opera extensions on the fly.
 
 The motto: to handle preferences, write as little code as possible.
 
-An [example](http://gromnitsky.github.com/weakspec/e01.html).
+An [example](http://gromnitsky.github.com/weakspec/e01.html) (works only
+in Opera, obviously).
 
 
 ## Introduction
@@ -67,7 +68,7 @@ A short example:
     }
 
 Spec requires 1 variable `weakspec`, which is a hash. A hash must
-contain at least 1 group. Each group have unlimited number of
+contain at least 1 group. Each group has unlimited number of
 preferences. In the example above, we have 1 group named 'Rotation',
 which have 2 preferences, named 'angle' & 'domquery'.
 
@@ -75,13 +76,13 @@ which have 2 preferences, named 'angle' & 'domquery'.
 
 A 'type' key designates a GUI element for a preference & its additional
 options. For example, 'number' type can hold only a JavaScript
-number. If you supply an array or a string for it, validation will fail.
+number. If you supply an array or a string for it, a validation will fail.
 
 ### Required options for all preference types
 
 * `default`
   
-  A default value. Cannot be null. A possible value depends on a type.
+  A default value. Cannot be null. The possible value depends on a type.
   
 * `desc`
 
@@ -99,8 +100,8 @@ number. If you supply an array or a string for it, validation will fail.
    A function that takes 1 argument--a _value_ and return `true` if
    value is valid & `false` otherwise. Use this if your preference is so
    complex that provided constraints cannot suit you. It
-   `validationCallback` is present or != `null`, all other validation
-   options are ignored.
+   `validationCallback` is present & != `null`, all other constraints
+   are ignored.
    
 ### number
 
@@ -124,7 +125,7 @@ A (probably short) JS string.
 
 * `validationRegexp`
 
-   A string that contains a JS regexp. The preference value will be
+   A _string_ that contains a JS regexp. The preference value will be
    checked against it.
 
 ### list
@@ -153,7 +154,7 @@ A fixed array of strings. Multi or single selectable.
         }
 
     `[1, 2]` in `selectedSize` means that min 1 element & max 2 elements
-    if a list can be selected. If `selectedSize` would be equal to
+    in the list can be selected. If `selectedSize` would be equal to
     `[1, 1]` that means only 1 element can be selected.
 
 ### bool
@@ -241,7 +242,7 @@ example:
 	var weakspec_opts = {}
 	weakspec_opts.header = "<h1>Hi, Mom!</h1>"
 
-Or any other valid html in `weakspec_opts.header`.
+(Or any other valid html in `weakspec_opts.header`.)
 
 
 ## Development
@@ -250,6 +251,10 @@ While constructing `options.weakspec.js` open `options.html` in Opera as
 a any other local html page. You don't need to open it only from the
 installed extension (but you can, of course). `widget.preferences`
 object will be mocked.
+
+Also make sure, you've unchecked
+[Scripts]->[Show parse errors and break on exception] in Dragonfly's
+Settings.
 
 
 ## Building

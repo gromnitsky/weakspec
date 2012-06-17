@@ -205,9 +205,11 @@ mybind = (pref) ->
     # clean button
     (document.querySelector "[id='clean']").addEventListener 'click', ->
         return unless confirm "This will delete all preferences for this " +
-        "extension from Opera. After that it'll be the same as if you have " +
-        "installed this extension for the first time.\n\n" +
-        "Are you sure?"
+        "extension from Opera. After that the extension will be in a " +
+        "broken state " +
+        "until you hit 'reload' in development mode or deinstall/install " +
+        "it manually.\n\n" +
+        "IF YOU DIDN'T UNDERSTAND THE EXPLANATION, CLICK CANCEL."
 
         pref.storage.clean()
 

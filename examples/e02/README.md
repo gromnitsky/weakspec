@@ -11,14 +11,11 @@ code as possible.' You write `options.weakspec.js`--that's inevitable &
 weakspec generates a usable preferences page on the fly, but that
 doesn't solve another subtle problem:
 
-### How do I get the default preferences into my extension?
+### How do I get default values of preferences into my extension?
 
 Sure, they will appear after user visits a preference page. But forcing
-him to do that is lame, and many users will just afraid of changing
-something by accident.
-
-So you have to set the defaults while your extension loads for the first
-time.
+him to do that is lame. So you have to set the defaults while your
+extension loads for the first time.
 
 How do you do that?
 
@@ -51,7 +48,7 @@ But we have another problem mentioned in weakspec's `README.md`:
 `widget.preferences` object is not a hash, but a dumb flat key-value
 store, where values are strings. weakspec bypass that by converting a
 bunch of group values into a JSONified strings. You need a reverse that
-operation to get to a particular preference.
+operation to get to a particular preference value.
 
 That's when `extstorage.js` can be symlinked to `includes` directory.
 

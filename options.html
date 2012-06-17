@@ -11,7 +11,6 @@
 <html lang='en'>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Weakspec</title>
     <script src='options.weakspec.js'></script>
     
     <script>
@@ -1389,7 +1388,7 @@
       return _results;
     }, false);
     (document.querySelector("[id='clean']")).addEventListener('click', function() {
-      if (!confirm("This will delete all preferences for this " + "extension from Opera. After that it'll be the same as if you have " + "installed this extension for the first time.\n\n" + "Are you sure?")) {
+      if (!confirm("This will delete all preferences for this " + "extension from Opera. After that the extension will be in a " + "broken state " + "until you hit 'reload' in development mode or deinstall/install " + "it manually.\n\n" + "IF YOU DIDN'T UNDERSTAND THE EXPLANATION, CLICK CANCEL.")) {
         return;
       }
       pref.storage.clean();
@@ -1502,7 +1501,7 @@ body {
 }
 */
 
-#dump {
+#debug {
 	float:right;
 }
 
@@ -1614,8 +1613,10 @@ td a:hover {
 	<p>
       <button type='button' id='save'>Save All</button>
       <button type='button' id='reset'>All to Defaults</button>
+	  <span id='debug'>
       <button type='button' id='clean'>Delete All Preferences</button>
       <button type='button' id='dump'>Dump to the Console</button>
+	  </span>
 	</p>  
     </div>
 
