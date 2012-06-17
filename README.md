@@ -2,9 +2,9 @@
 
 Generates a usable preferences page for Opera extensions on the fly.
 
-The motto: to handle preferences, write code as little as possible.
+The motto: to handle preferences, write as little code as possible.
 
-An example: http://gromnitsky.github.com/weakspec/e01.html
+An [example](http://gromnitsky.github.com/weakspec/e01.html).
 
 
 ## Introduction
