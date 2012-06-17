@@ -106,7 +106,7 @@ number. If you supply an array or a string for it, validation will fail.
 
 Any JS number, signed or unsigned.
 
-#### Constrains
+#### Constraints
 
 * `range`
 
@@ -116,7 +116,7 @@ Any JS number, signed or unsigned.
 
 A (probably short) JS string.
 
-#### Constrains
+#### Constraints
 
 * `allowEmpty`
 
@@ -137,7 +137,7 @@ A fixed array of strings. Multi or single selectable.
 
    An array.
 
-#### Constrains
+#### Constraints
 
 * `selectedSize`
 
@@ -164,7 +164,7 @@ A JS boolean: `true` or `false`.
 
 A JS string that can contain newlines.
 
-#### Constrains
+#### Constraints
 
 * `allowEmpty`
 
@@ -183,7 +183,7 @@ format.
 
 A string that contain a valid email address.
 
-#### Constrains
+#### Constraints
 
 * `allowEmpty`
 
@@ -193,7 +193,7 @@ A string that contain a valid email address.
 
 A string in UTC ISO 8601 format (without decimal fractions).
 
-#### Constrains
+#### Constraints
 
 * `allowEmpty`
 
@@ -207,7 +207,7 @@ A string in UTC ISO 8601 format (without decimal fractions).
 
 A string in `YYYY-MM-DD` format.
 
-#### Constrains
+#### Constraints
 
 * `allowEmpty`
 
@@ -222,7 +222,7 @@ A string in `YYYY-MM-DD` format.
 A string in `YYYY-WNN` format, where 'W' is a literal char & 'NN' is a number
 [1...48].
 
-#### Constrains
+#### Constraints
 
 * `allowEmpty`
 
